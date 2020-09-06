@@ -12,7 +12,7 @@
  */
 void parse_stat(char *file, struct Stat *stat) {
 	check_file_name(file, "stat");
-	FILE *fp = fopen(file, "r");
+	FILE *fp = open_file(file);
 	if (fp == NULL) {
 		fprintf(stderr, "Error opening file %s\n", file);
 		exit(1);
@@ -23,10 +23,7 @@ void parse_stat(char *file, struct Stat *stat) {
 		&(stat->pid), s, &(stat->state),
 		&d, &d, &d, &d, &d, &d, &d, &d, &d, &d,
 		&(stat->utime), &(stat->stime));
-	if (fclose(fp) != 0) {
-		fprintf(stderr, "Error closing file %s\n", file);
-		exit(1);
-	}
+	close_file(file, fp);
 }
 
 /*
@@ -35,22 +32,18 @@ void parse_stat(char *file, struct Stat *stat) {
  */
 int parse_statm(char *file) {
 	check_file_name(file, "statm");
-	FILE *fp = fopen(file, "r");
-	if (fp == NULL) {
-		fprintf(stderr, "Error opening file %s\n", file);
-		exit(1);
-	}
+	FILE *fp = open_file(file);
 	int d = 0;
 	fscanf(fp, "%d", &d);
-	if (fclose(fp) != 0) {
-		fprintf(stderr, "Error closing file %s\n", file);
-		exit(1);
-	}
+	close_file(file, fp);
 	return d;
 }
 
-char *get_cmd() {
-	
+void get_cmd(char *file, char *cmd) {
+	check_file_name(file, "cmdline");
+	FILE *fp = open_file(file);
+	fscanf(fp, "%s", cmd);
+	close_file(file, fp);
 }
 
 FILE *open_file(char *file) {

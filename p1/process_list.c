@@ -47,7 +47,7 @@ int is_user_proc(char *uid, char *pid) {
 	return !strcmp(uid, proc_uid);
 }
 
-struct PNode *read_user_proc() {
+struct PNode *get_user_proc() {
 	DIR *dir;
 	struct dirent *entry;
 	if ((dir = opendir("/proc")) == NULL) {
