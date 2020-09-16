@@ -11,4 +11,4 @@ int is_pid(char *dir_name);
 
 int is_user_proc(char *uid, char *pid);
 
-struct PNode *get_user_proc();
+struct PNode *get_proc(int user);

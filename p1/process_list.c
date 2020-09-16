@@ -47,7 +47,7 @@ int is_user_proc(char *uid, char *pid) {
 	return !strcmp(uid, proc_uid);
 }
 
-struct PNode *get_user_proc() {
+struct PNode *get_proc(int user) {
 	DIR *dir;
 	struct dirent *entry;
 	if ((dir = opendir("/proc")) == NULL) {
@@ -60,7 +60,7 @@ struct PNode *get_user_proc() {
 	while ((entry = readdir(dir)) != NULL) {
 		char *dir_name = entry->d_name;
 		if (is_pid(dir_name) && entry->d_type == DT_DIR
-			&& is_user_proc(uid, dir_name)) {
+			&& (!user || is_user_proc(uid, dir_name))) {
 			if (!head) {
 				head = malloc(sizeof(struct PNode));
 				head->pid = dir_name;
