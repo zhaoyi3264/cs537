@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "stat_file_parser.h"
 #include "process_list.h"
+#include "options_processing.h"
+#include "struct.h"
 
 void get_proc_file(char *dest, char *pid, char *file) {
 	strcat(dest, "/proc/");
@@ -14,6 +16,7 @@ void get_proc_file(char *dest, char *pid, char *file) {
 
 // don't forget extra credit
 int main (int argc, char *argv[]) {
+
 	// stat_file_parser
 	//~ struct Stat *stat = malloc(sizeof(struct Stat));
 	//~ parse_stat("/proc/1/stat", stat);
@@ -33,47 +36,17 @@ int main (int argc, char *argv[]) {
 	//~ printf("%s\n", file);
 	//~ free(file);
 	
-	// 
-	int opt, p, state, utime, stime, vm, cmd;
-	char pid[8];
-	while ((opt = getopt(argc, argv, "p:sUSvc")) != -1) {
-		printf("%c\n", opt);
-		switch(opt) {
-			case 'p':
-				p = 1;
-				strcpy(pid, optarg);
-				break;
-			case 's':
-				state = 1;
-				break;
-			case 'U':
-				utime = 1;
-				break;
-			case 'S':
-				stime = 1;
-				break;
-			case 'v':
-				vm = 1;
-				break;
-			case 'c':
-				cmd = 1;
-				break;
-			default:
-				break;
-		}
-	}
+	int p, state, utime, stime, vm, cmd;
+	p = state = stime = vm = 0;
+	utime = cmd = 1;
 	
-	state = 1, utime = 1, stime = 1, vm = 1, cmd = 1;
-	//~ process_list
-	struct PNode *head;
-	if (p) {
-		head = malloc(sizeof(struct PNode));
-		head->pid = pid;
-	} else {
+	struct PNode *head = parse_cmdline_options(argc, argv, &p, &state, &utime,
+		&stime, &vm, &cmd);
+	if (!head) {
 		head = get_proc(1);
-	}
-	struct PNode *previous = head;
+	}	
 	struct PNode *current = head;
+	struct PNode *previous = head;
 	struct Stat *stat = malloc(sizeof(struct Stat));
 	while(current) {
 		char *file = calloc(16, sizeof(char));
@@ -111,7 +84,6 @@ int main (int argc, char *argv[]) {
 		current = current->next;
 		free(previous);
 		previous = current;
-		
 		free(file);
 	}
 	free(stat);

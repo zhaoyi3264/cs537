@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <dirent.h>
 #include "process_list.h"
+#include "struct.h"
 
 char *get_proc_uid(char *file) {
 	FILE *fp = fopen(file, "r");

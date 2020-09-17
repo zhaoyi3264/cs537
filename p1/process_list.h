@@ -1,8 +1,3 @@
-struct PNode {
-	char *pid;
-	struct PNode *next;
-};
-
 char *get_proc_uid(char *file);
 
 char *get_user_uid();
