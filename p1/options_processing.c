@@ -40,10 +40,11 @@ struct PNode *parse_cmdline_options(int argc, char *argv[],
 				break;
 		}
 	}
-	struct PNode *temp = head;
-	head = head->next; // skip the first empty node
-	free(temp);
 	if ((*p)) {
+		// skip and free the first empty node
+		struct PNode *temp = head;
+		head = head->next;
+		free(temp);
 		return head;
 	} else {
 		free(head);
