@@ -5,7 +5,7 @@
 #include "stat_file_parser.h"
 
 /*
- * stat file
+ * Parse parameters from stat
  * (1) pid
  * (3) state
  * (14) utime
@@ -20,6 +20,7 @@ void parse_stat(char *file, struct Stat *stat) {
 	}
 	char s[50];
 	int d = 0;
+	/* skips to the parameters we need */
 	fscanf(fp, "%d %s %c %d %d %d %d %d %d %d %d %d %d %d %d",
 		&(stat->pid), s, &(stat->state),
 		&d, &d, &d, &d, &d, &d, &d, &d, &d, &d,
@@ -28,7 +29,7 @@ void parse_stat(char *file, struct Stat *stat) {
 }
 
 /*
- * statm file
+ * Parse size in statm file
  * (1) size
  */
 int parse_statm(char *file) {
@@ -39,7 +40,9 @@ int parse_statm(char *file) {
 	close_file(file, fp);
 	return d;
 }
-
+/*
+ * Parse file name from command
+ */
 void get_cmd(char *file, char *cmd) {
 	check_file_name(file, "cmdline");
 	FILE *fp = open_file(file);
@@ -47,6 +50,9 @@ void get_cmd(char *file, char *cmd) {
 	close_file(file, fp);
 }
 
+/*
+ * Opens file and checks if successful
+ */
 FILE *open_file(char *file) {
 	FILE *fp = fopen(file, "r");
 	if (fp == NULL) {
@@ -56,6 +62,9 @@ FILE *open_file(char *file) {
 	return fp;
 }
 
+/*
+ * Closes file and checks if successful
+ */
 void close_file(char *file, FILE *fp) {
 	if (fclose(fp) != 0) {
 		fprintf(stderr, "Error closing file %s\n", file);
@@ -63,6 +72,10 @@ void close_file(char *file, FILE *fp) {
 	}
 }
 
+/*
+ * Checks if the file name is valid 
+ * TODO: May delete it
+ */
 void check_file_name(char *file, char *target) {
     size_t file_len = strlen(file);
     size_t target_len = strlen(target);
