@@ -16,6 +16,7 @@ struct PNode *parse_cmdline_options(int argc, char *argv[],
 	while ((opt = getopt(argc, argv, "p:s::U::S::v::c::")) != -1) {
 		switch(opt) {
 			case 'p':
+				// TODO: check digits
 				*p = 1;
 				current->next = malloc(sizeof(struct PNode));
 				current = current->next;

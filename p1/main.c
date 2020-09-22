@@ -6,6 +6,7 @@
 #include "process_list.h"
 #include "options_processing.h"
 
+// TODO: use snprintf
 void get_proc_file(char *dest, char *pid, char *file) {
 	strcat(dest, "/proc/");
 	strcat(dest, pid);
