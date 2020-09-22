@@ -1,3 +1,9 @@
+/*
+ * Authors: 
+ * Zhaoyi Zhang, netid: zzhang825
+ * Richard Li, netid: tli354
+ */
+
 void parse_stat(char *file, struct Stat *stat);
 
 int parse_statm(char *file);
