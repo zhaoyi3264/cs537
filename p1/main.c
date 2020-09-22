@@ -1,3 +1,9 @@
+/*
+ * Authors: 
+ * Zhaoyi Zhang, netid: zzhang825
+ * Richard Li, netid: tli354
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +12,9 @@
 #include "process_list.h"
 #include "options_processing.h"
 
+/* 
+ * Gets the spefified file under the pid repository
+ */
 void get_proc_file(char *dest, char *pid, char *file) {
 	strcat(dest, "/proc/");
 	strcat(dest, pid);
@@ -13,7 +22,10 @@ void get_proc_file(char *dest, char *pid, char *file) {
 	strcat(dest, file);
 }
 
-// don't forget extra credit
+/* 
+ * Main method to mobilize the program
+ * Prints corresponding process information as the command prompts
+ */
 int main (int argc, char *argv[]) {
 	int p, state, utime, stime, vm, cmd;
 	p = state = stime = vm = 0;
