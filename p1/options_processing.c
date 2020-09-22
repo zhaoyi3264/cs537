@@ -1,18 +1,31 @@
+/*
+ * Authors: 
+ * Zhaoyi Zhang, netid: zzhang825
+ * Richard Li, netid: tli354
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include "struct.h"
 #include "options_processing.h"
 
+/*
+ * Checks the flag
+ */
 int toggle_flag() {
 	return optarg == NULL || strcmp(optarg, "-");
 }
 
+/*
+ * Parses user options from the command line 
+ */
 struct PNode *parse_cmdline_options(int argc, char *argv[],
 	int *p, int *state, int *utime, int *stime, int *vm, int *cmd) {
 	int opt;
 	struct PNode *head = malloc(sizeof(struct PNode));
 	struct PNode *current = head;
+	/* Parses required and optional arguments*/
 	while ((opt = getopt(argc, argv, "p:s::U::S::v::c::")) != -1) {
 		switch(opt) {
 			case 'p':

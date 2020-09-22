@@ -1,3 +1,9 @@
+/*
+ * Authors: 
+ * Zhaoyi Zhang, netid: zzhang825
+ * Richard Li, netid: tli354
+ */
+
 char *get_proc_uid(char *file);
 
 char *get_user_uid();

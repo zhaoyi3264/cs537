@@ -1,3 +1,9 @@
+/*
+ * Authors: 
+ * Zhaoyi Zhang, netid: zzhang825
+ * Richard Li, netid: tli354
+ */
+
 int toggle_flag();
 
 struct PNode *parse_cmdline_options(int argc, char *argv[],
