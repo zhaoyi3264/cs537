@@ -12,13 +12,10 @@
 #include "process_list.h"
 #include "options_processing.h"
 
-<<<<<<< HEAD
 // TODO: use snprintf
-=======
 /* 
  * Gets the spefified file under the pid repository
  */
->>>>>>> origin/Richard
 void get_proc_file(char *dest, char *pid, char *file) {
 	strcat(dest, "/proc/");
 	strcat(dest, pid);

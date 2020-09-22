@@ -1,9 +1,3 @@
-/*
- * Authors: 
- * Zhaoyi Zhang, netid: zzhang825
- * Richard Li, netid: tli354
- */
- 
 CC = gcc
 WARNING_FLAGS = -Wall -Wextra
 EXE = 537ps
