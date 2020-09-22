@@ -1,95 +1,89 @@
 /*
  * Authors: 
- * Zhaoyi Zhang, netid: zzhang825
- * Richard Li, netid: tli354
+ * - Zhaoyi Zhang, netid: zzhang825
+ * - Richard Li, netid: tli354
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "struct.h"
+#include "common.h"
 #include "stat_file_parser.h"
 
 /*
- * Parse parameters from stat
- * (1) pid
- * (3) state
- * (14) utime
- * (15) stime
+ * Read the pid, status, utime, stime fields in /proc/[pid]/stat into a Stat
+ * struct
+ * 
+ * file: the path of the stat file of a process
+ * stat: the struct to store parsed fields
  */
 void parse_stat(char *file, struct Stat *stat) {
-	check_file_name(file, "stat");
 	FILE *fp = open_file(file);
-	if (fp == NULL) {
-		fprintf(stderr, "Error opening file %s\n", file);
-		exit(1);
-	}
-	char s[50];
+	char s[64];
 	int d = 0;
-	/* skips to the parameters we need */
-	fscanf(fp, "%d %s %c %d %d %d %d %d %d %d %d %d %d %d %d",
+	// skips to the parameters we need
+	int r = fscanf(fp, "%d %s %c %d %d %d %d %d %d %d %d %d %d %lu %lu",
 		&(stat->pid), s, &(stat->state),
 		&d, &d, &d, &d, &d, &d, &d, &d, &d, &d,
 		&(stat->utime), &(stat->stime));
-	close_file(file, fp);
+	if (r < 0) {
+		exit(1);
+	}
+	close_file(fp);
 }
 
 /*
- * Parse size in statm file
- * (1) size
+ * Read the Vmsize field in /proc/[pid]/statm
+ * 
+ * file: the path of the statm file of a process
+ * 
+ * return: the Vmsize field
  */
 int parse_statm(char *file) {
-	check_file_name(file, "statm");
 	FILE *fp = open_file(file);
 	int d = 0;
-	fscanf(fp, "%d", &d);
-	close_file(file, fp);
+	if (fscanf(fp, "%d", &d) < 0) {
+		exit(1);
+	}
+	close_file(fp);
 	return d;
 }
 /*
- * Parse file name from command
+ * Read the command that starts the process in /proc/[pid]/cmdline
+ * 
+ * file: the path of the cmdline file of a process
+ * cmd: the buffer to store the command string
  */
 void get_cmd(char *file, char *cmd) {
-	check_file_name(file, "cmdline");
 	FILE *fp = open_file(file);
-	fscanf(fp, "%s", cmd);
-	close_file(file, fp);
+	if (fscanf(fp, "%s", cmd) < 0) {
+		exit(1);
+	}
+	close_file(fp);
 }
 
 /*
- * Opens file and checks if successful
+ * Opens a file pointer
+ * 
+ * file: the file name
+ * 
+ * return: the file pointer
  */
 FILE *open_file(char *file) {
 	FILE *fp = fopen(file, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "Error opening file %s\n", file);
 		exit(1);
 	}
 	return fp;
 }
 
 /*
- * Closes file and checks if successful
+ * Closes a file pointer
+ * 
+ * fp: the file pointer
  */
-void close_file(char *file, FILE *fp) {
+void close_file(FILE *fp) {
 	if (fclose(fp) != 0) {
-		fprintf(stderr, "Error closing file %s\n", file);
 		exit(1);
-	}
-}
-
-/*
- * Checks if the file name is valid 
- * TODO: May delete it
- */
-void check_file_name(char *file, char *target) {
-    size_t file_len = strlen(file);
-    size_t target_len = strlen(target);
-	char* s = file + file_len - target_len;
-	if (s == NULL || strcmp(s, target)) {
-		fprintf(stderr,
-			"Error in file name %s, when a %s file is expected\n",
-			file, target);
-			exit(1);
 	}
 }

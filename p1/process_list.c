@@ -1,7 +1,7 @@
 /*
  * Authors: 
- * Zhaoyi Zhang, netid: zzhang825
- * Richard Li, netid: tli354
+ * - Zhaoyi Zhang, netid: zzhang825
+ * - Richard Li, netid: tli354
  */
 
 #include <stdio.h>
@@ -9,42 +9,56 @@
 #include <string.h>
 #include <ctype.h>
 #include <dirent.h>
+#include "common.h"
 #include "process_list.h"
-#include "struct.h"
 
 /*
- * Gets the uid of a proc
+ * Gets the uid of a process
+ * 
+ * file: the path of the status file of a process
+ * 
+ * return: the uid of the process
  */
 char *get_proc_uid(char *file) {
 	FILE *fp = fopen(file, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "Error opening file %s\n", file);
 		exit(1);
 	}
 	char line[256];
 	char temp[4];
 	char *uid = malloc(sizeof(char) * 10);
-	while(fgets(line, sizeof(line), fp)) {
+	if (uid == NULL) {
+		exit(1);
+	}
+	while (fgets(line, sizeof(line), fp)) {
+		// find the line that starts with "Uid:"
 		if (!strncmp(line, "Uid:", 4)) {
-			sscanf(line, "%s\t%s", temp, uid);
+			if (sscanf(line, "%s\t%s", temp, uid) < 0) {
+				exit(1);
+			}
 		}
 	}
 	if (fclose(fp) != 0) {
-		fprintf(stderr, "Error closing file %s\n", file);
 		exit(1);
 	}
 	return uid;
 }
 
 /*
- * Get uid of the user
+ * Gets uid of the current user
+ * 
+ * return: the uid of current user
  */
 char *get_user_uid() {
 	return get_proc_uid("/proc/self/status");
 }
 
 /*
- * Checks if it is a valid pid
+ * Checks if the name of a directory under /proc is a valid pid
+ * 
+ * dir_name: the name of a directory under /proc
+ * 
+ * return: 1 if the name if valid
  */
 int is_pid(char *dir_name) {
 	int pid = 1;
@@ -58,42 +72,51 @@ int is_pid(char *dir_name) {
 }
 
 /*
- * Checks if a proc belongs to the user
+ * Checks if a process belongs to the current user
+ * 
+ * uid: the uid of the current user
+ * pid: the pid of a process to check
+ * 
+ * return: 1 if the process belongs to the current user
  */
 int is_user_proc(char *uid, char *pid) {
-	char file[50] = "/proc/";
-	char *proc_uid = get_proc_uid(strcat(strcat(file, pid), "/status"));
+	char file[64];
+	if (snprintf(file, 64, "/proc/%s/status", pid) < 0) {
+		exit(1);
+	}
+	char *proc_uid = get_proc_uid(file);
 	return !strcmp(uid, proc_uid);
 }
 
 /*
- * Gets a list of procs from the linkedlist we create
+ * Gets a list of processes found under /proc
+ * 
+ * user: if to only get the processes that belong to the current user
+ * 
+ * return: a linked list of processes
  */
 struct PNode *get_proc(int user) {
 	DIR *dir;
 	struct dirent *entry;
 	if ((dir = opendir("/proc")) == NULL) {
-		fprintf(stderr, "Error reading /proc directory");
 		exit(1);
 	}
 	struct PNode *head = NULL;
 	struct PNode *current = NULL;
 	char *uid = get_user_uid();
 	
-	/* creates a linkedlist to store procs */
 	while ((entry = readdir(dir)) != NULL) {
 		char *dir_name = entry->d_name;
 		if (is_pid(dir_name) && entry->d_type == DT_DIR
 			&& (!user || is_user_proc(uid, dir_name))) {
 			if (!head) {
 				head = malloc(sizeof(struct PNode));
-				head->pid = dir_name;
 				current = head;
 			} else {
 				current->next = malloc(sizeof(struct PNode));
 				current = current->next;
-				current->pid = dir_name;
 			}
+			current->pid = dir_name;
 		}
 	}
 	closedir(dir);
