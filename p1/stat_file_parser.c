@@ -1,3 +1,9 @@
+/*
+ * Authors: 
+ * Zhaoyi Zhang, netid: zzhang825
+ * Richard Li, netid: tli354
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
