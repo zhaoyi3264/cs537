@@ -26,7 +26,7 @@ char *get_proc_uid(char *file) {
 	}
 	char line[256];
 	char temp[4];
-	char *uid = malloc(sizeof(char) * 10);
+	char *uid = malloc(10 * sizeof(char));
 	if (uid == NULL) {
 		exit(1);
 	}
@@ -104,17 +104,24 @@ struct PNode *get_proc(int user) {
 	struct PNode *head = NULL;
 	struct PNode *current = NULL;
 	char *uid = get_user_uid();
-	
+	// iterate through the directory and create the linked list
 	while ((entry = readdir(dir)) != NULL) {
 		char *dir_name = entry->d_name;
-		if (is_pid(dir_name) && entry->d_type == DT_DIR
+		// check if the directory name is a pid
+		if (entry->d_type == DT_DIR && is_pid(dir_name)
 			&& (!user || is_user_proc(uid, dir_name))) {
 			if (!head) {
 				head = malloc(sizeof(struct PNode));
+				if (head == NULL) {
+					exit(1);
+				}
 				current = head;
 			} else {
 				current->next = malloc(sizeof(struct PNode));
 				current = current->next;
+				if (current == NULL) {
+					exit(1);
+				}
 			}
 			current->pid = dir_name;
 		}

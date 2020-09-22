@@ -41,7 +41,7 @@ int main (int argc, char *argv[]) {
 	// set default values for option flags
 	p = state = stime = vm = 0;
 	utime = cmd = 1;
-	
+	// parse the command line options and get the list of processes to print
 	struct PNode *head = parse_cmdline_options(argc, argv, &p, &state, &utime,
 		&stime, &vm, &cmd);
 	if (!head) {
@@ -55,7 +55,7 @@ int main (int argc, char *argv[]) {
 	}
 	// iterate through the PNode list
 	while(current) {
-		char *file = calloc(16, sizeof(char));
+		char *file = malloc(16 * sizeof(char));
 		if (file == NULL) {
 			exit(1);
 		}
@@ -73,7 +73,7 @@ int main (int argc, char *argv[]) {
 			printf("\t stime=%lu", stat->utime);
 		}
 		if (vm) {
-			char *statm_file = calloc(16, sizeof(char));
+			char *statm_file = malloc(16 * sizeof(char));
 			if (statm_file == NULL) {
 				exit(1);
 			}
@@ -82,11 +82,11 @@ int main (int argc, char *argv[]) {
 			free(statm_file);
 		}
 		if (cmd) {
-			char *cmd = calloc(256, sizeof(char));
+			char *cmd = malloc(256 * sizeof(char));
 			if (cmd == NULL) {
 				exit(1);
 			}
-			char *cmd_file = calloc(16, sizeof(char));
+			char *cmd_file = malloc(16 * sizeof(char));
 			if (cmd_file == NULL) {
 				exit(1);
 			}

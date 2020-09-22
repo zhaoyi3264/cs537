@@ -64,12 +64,19 @@ struct PNode *parse_cmdline_options(int argc, char *argv[],
 						break;
 					}
 				}
+				// if pid is valid and does not exist in the list
 				if (is_pid && !exist(head, optarg)) {
 					if (!head) {
 						head = malloc(sizeof(struct PNode));
 						current = head;
+						if (head == NULL) {
+							exit(1);
+						}
 					} else {
 						current->next = malloc(sizeof(struct PNode));
+						if (current == NULL) {
+							exit(1);
+						}
 						current = current->next;
 					}
 					current->pid = optarg;
