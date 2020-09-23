@@ -13,6 +13,8 @@ int parse_statm(char *file);
 
 void get_cmd(char *file, char *cmd);
 
+void get_mem(char *pid, char *buf, long int addr, int size);
+
 FILE *open_file(char *file);
 
 void close_file(FILE *fp);

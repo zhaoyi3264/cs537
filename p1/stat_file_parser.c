@@ -9,6 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ptrace.h>
+#include <sys/wait.h>
 #include "common.h"
 #include "stat_file_parser.h"
 
@@ -67,6 +71,75 @@ void get_cmd(char *file, char *cmd) {
 		cmd[i++] = c;
 	} while(1);
 	close_file(fp);
+}
+
+/*
+ * Read the memory content of the process
+ * 
+ * pid: the pid of the process
+ * buf: the buffer to read memory into
+ * addr: addr of the memory to read
+ * size: size in bytes of the memory to read
+ */
+void get_mem(char *pid, char *buf, long int addr, int size) {
+	// get file names
+	char *mem_file = malloc(32);
+	if (mem_file == NULL) {
+		exit(1);
+	}
+	if (sprintf(mem_file, "/proc/%s/mem", pid) < 0) {
+		exit(1);
+	}
+	char *maps_file = malloc(32);
+	if (maps_file == NULL) {
+		exit(1);
+	}
+	if (snprintf(maps_file, 32, "/proc/%s/maps", pid) < 0) {
+		exit(1);
+	}
+	// check if the addr is a valid address
+	FILE *fp = open_file(maps_file);
+	char line[256];
+	int valid = 0;
+	while (fgets(line, sizeof(line), fp)) {
+		// get the lower and upper bound of the valid address
+		char *bound = strtok(line, " ");
+		char *lower = strtok(bound, "-");
+		char *upper = strtok(NULL, "-");
+		long int addr_l = strtol(lower, NULL, 16);
+		long int addr_u = strtol(upper, NULL, 16);
+		//~ printf("%ld %ld\n", addr_l, addr_u);
+		if (addr_l <= addr && addr <= addr_u) {
+			valid = 1;
+			break;
+		}
+	}
+	close_file(fp);
+	if (!valid) {
+		printf("error: invalid memory address\n");
+		exit(1);
+	}
+	// read the memory using ptrace and pread
+	int pid_num = atoi(pid);
+	if (ptrace(PTRACE_ATTACH, pid_num, NULL, NULL) == -1) {
+		exit(1);
+	}
+	if (waitpid(pid_num, NULL, 0) == -1) {
+		exit(1);
+	}
+	int mem_fd = open(mem_file, O_RDONLY);
+	if (mem_fd == -1) {
+		exit(1);
+	}
+	if (pread(mem_fd, buf, size, addr) < 0) {
+		exit(1);
+	}
+	if (ptrace(PTRACE_DETACH, pid_num, NULL, NULL) == -1) {
+		exit(1);
+	}
+	if (close(mem_fd) != 0) {
+		exit(1);
+	}
 }
 
 /*

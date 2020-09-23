@@ -49,11 +49,12 @@ int exist(struct PNode *head, char *pid) {
  * return: the process list
  */
 struct PNode *parse_cmdline_options(int argc, char *argv[],
-	int *p, int *state, int *utime, int *stime, int *vm, int *cmd) {
+	int *p, int *state, int *utime, int *stime, int *vm, int *cmd,
+	int *m, long int *addr, int *size) {
 	int opt;
 	struct PNode *head = NULL;
 	struct PNode *current = NULL;
-	while ((opt = getopt(argc, argv, "p:s::U::S::v::c::")) != -1) {
+	while ((opt = getopt(argc, argv, "-p:s::U::S::v::c::m:")) != -1) {
 		switch(opt) {
 			case 'p':
 				*p = 1;
@@ -97,8 +98,32 @@ struct PNode *parse_cmdline_options(int argc, char *argv[],
 			case 'c':
 				*cmd = toggle_flag();
 				break;
-			default:
+			case 'm':
+				*m = toggle_flag();
+				for (int i = 0; optarg[i] != '\0'; i++) {
+					// if not a digit, lower case, or upper case letter
+					if (!isdigit(optarg[i]) && ((optarg[i] < 65 || optarg[i] > 70)
+						&& (optarg[i] < 97 || optarg[i] > 102))) {
+						printf("error: memory address syntax error\n");
+						exit(1);
+					}
+				}
+				*addr = strtol(optarg, NULL, 16);
 				break;
+			case 1:
+				// read in the size
+				if (*m) {
+					for (int i = 0; optarg[i] != '\0'; i++) {
+						if (!isdigit(optarg[i])) {
+							printf("error: size syntax error\n");
+							exit(1);
+						}
+					}
+					*size = atoi(optarg);
+				}
+				break;
+			default:
+				exit(1);
 		}
 	}
 	return head;

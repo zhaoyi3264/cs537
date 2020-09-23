@@ -39,13 +39,14 @@ void get_proc_file(char *dest, char *pid, char *file) {
  */
 int main (int argc, char *argv[]) {
 	// option flags
-	int p, state, utime, stime, vm, cmd;
+	int p, state, utime, stime, vm, cmd, m, size;
 	// set default values for option flags
-	p = state = stime = vm = 0;
+	p = state = stime = vm = m = size = 0;
 	utime = cmd = 1;
+	long int addr = 0;
 	// parse the command line options and get the list of processes to print
 	struct PNode *head = parse_cmdline_options(argc, argv, &p, &state, &utime,
-		&stime, &vm, &cmd);
+		&stime, &vm, &cmd, &m, &addr, &size);
 	if (!head) {
 		head = get_proc(1);
 	}
@@ -64,9 +65,21 @@ int main (int argc, char *argv[]) {
 		get_proc_file(file, current->pid, "stat");
 		parse_stat(file, stat);
 		
+		char *buf = malloc(size);
+		if (buf == NULL) {
+			exit(1);
+		}
+		// check if multiple -p options are provided
+		if (m) {
+			if (head->next) {
+				printf("error: cannot provide multiple pids when -m option is present\n");
+				exit(1);
+			}
+			get_mem(head->pid, buf, addr, size);
+		}
 		printf("%s:", current->pid);
 		if (state) {
-			printf("\t %c", stat->state);
+			printf(" %c", stat->state);
 		}
 		if (utime) {
 			printf("\t utime=%lu", stat->utime);
@@ -98,12 +111,19 @@ int main (int argc, char *argv[]) {
 			free(cmd);
 			free(cmd_file);
 		}
+		if (m) {
+			printf(" \tmemoery %ld=", addr);
+			for (int i = 0; i < size; i++) {
+				printf("%x ", buf[i]);
+			}
+		}
 		printf("\n");
 		
 		current = current->next;
 		free(previous);
 		previous = current;
 		free(file);
+		free(buf);
 	}
 	free(stat);
 }
