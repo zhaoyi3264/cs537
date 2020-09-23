@@ -1,0 +1,1 @@
+We implemented a simpler version of the linux ps command. It can be used to display the process that belong to the current user or specified process, and extra information such as status, the amount of user time consumed, the amount of system time consumed, the amount of virtual memory currently being used, and the command-line that started the process.

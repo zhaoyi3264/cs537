@@ -1,4 +1,6 @@
 /*
+ * Provides methods for getting current user's processes
+ * 
  * Authors: 
  * - Zhaoyi Zhang, netid: zzhang825
  * - Richard Li, netid: tli354

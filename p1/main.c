@@ -1,4 +1,6 @@
 /*
+ * Main driver module
+ * 
  * Authors: 
  * - Zhaoyi Zhang, netid: zzhang825
  * - Richard Li, netid: tli354
@@ -82,11 +84,11 @@ int main (int argc, char *argv[]) {
 			free(statm_file);
 		}
 		if (cmd) {
-			char *cmd = malloc(256 * sizeof(char));
+			char *cmd = malloc(512 * sizeof(char));
 			if (cmd == NULL) {
 				exit(1);
 			}
-			char *cmd_file = malloc(16 * sizeof(char));
+			char *cmd_file = malloc(32 * sizeof(char));
 			if (cmd_file == NULL) {
 				exit(1);
 			}

@@ -1,4 +1,6 @@
 /*
+ * Provides methods for parsing and getting fields in stat, statm, cmdline files
+ * 
  * Authors: 
  * - Zhaoyi Zhang, netid: zzhang825
  * - Richard Li, netid: tli354
@@ -55,10 +57,15 @@ int parse_statm(char *file) {
  * cmd: the buffer to store the command string
  */
 void get_cmd(char *file, char *cmd) {
+	int i = 0;
 	FILE *fp = open_file(file);
-	if (fscanf(fp, "%s", cmd) < 0) {
-		exit(1);
-	}
+	do {
+		int c = fgetc(fp);
+		if(feof(fp)) {
+			break;
+		}
+		cmd[i++] = c;
+	} while(1);
 	close_file(fp);
 }
 
