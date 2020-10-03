@@ -4,7 +4,7 @@ LIB_FLAGS = -pthread
 EXE = prodcomm
 
 all: main.o queue.o
-	$(CC) $(LIB_FLAGS) -o $(EXE) main.o queue.o
+	$(CC) $(LIB_FLAGS) main.o queue.o -o $(EXE)
 
 main.o: main.c queue.h
 	$(CC) $(WARNING_FLAGS) -c main.c

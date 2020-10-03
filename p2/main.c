@@ -3,19 +3,36 @@
 #include <pthread.h>
 #include "queue.h"
 
-void *run(void *q) {
-	EnqueueString(q, "a");
+Queue *q;
+
+void *enqueue_test(void *arg) {
+	EnqueueString(q, arg);
 	return NULL;
 }
 
-int main() {
-	struct Queue *q = CreateStringQueue(10);
-	pthread_t threads[10];
-	for (int i = 0; i < 10; i++) {
-		pthread_create(&(threads[i]), NULL, run, q);
+void *dequeue_test(void *arg) {
+	DequeueString(q);
+	return arg;
+}
+
+void stress_test(int queue_size, int thread_num) {
+	q = CreateStringQueue(queue_size);
+	pthread_t threads[thread_num];
+	for (int i = 0; i < thread_num; i++) {
+		if (i % 2) {
+			char *buffer  = malloc(8);
+			sprintf(buffer, "%d", i);
+			pthread_create(&(threads[i]), NULL, enqueue_test, buffer);
+		} else {
+			pthread_create(&(threads[i]), NULL, dequeue_test, NULL);
+		}
 	}
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < thread_num; i++) {
 		pthread_join(threads[i], NULL);
 	}
 	PrintQueueStats(q);
+}
+
+int main() {
+	stress_test(5, 50);
 }

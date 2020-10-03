@@ -1,22 +1,22 @@
 #include <semaphore.h>
 
-struct Queue {
+typedef struct Queue {
 	int size;
-	int capacity;
 	char **data;
 	sem_t *mutex;
-	sem_t *wait;
+	sem_t *empty;
+	sem_t *full;
 	
 	int enqueueCount;
 	int dequeueCount;
-	int enqueueBlockCount;
-	int dequeueBlockCount;
-};
+	int enqueueTime;
+	int dequeueTime;
+} Queue;
 
-struct Queue *CreateStringQueue(int capacity);
+Queue *CreateStringQueue(int size);
 
-void EnqueueString(struct Queue *q, char *string);
+void EnqueueString(Queue *q, char *string);
 
-char * DequeueString(struct Queue *q);
+char * DequeueString(Queue *q);
 
-void PrintQueueStats(struct Queue *q);
+void PrintQueueStats(Queue *q);
