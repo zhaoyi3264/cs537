@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/time.h>
 #include "queue.h"
 
@@ -44,21 +43,21 @@ Queue *CreateStringQueue(int size) {
  * queue is full, then this function blocks until there is space available.
  */
 void EnqueueString(Queue *q, char *string) {
-	sleep(1);
+	// start timing
 	struct timeval *start = malloc(sizeof(struct timeval));
 	gettimeofday(start, NULL);
-	sem_wait(q->empty); // wait for empty
-	
+	// wait for any empty
+	sem_wait(q->empty);
+	// acquire the lock
 	sem_wait(q->mutex);
 	(q->data)[(q->enqueueCount) % (q->size)] = string;
 	q->enqueueCount += 1;
 	printf("enqueued: %s\tqueue: ", string);
 	printQueue(q);
 	sem_post(q->mutex);
-	
-	sem_post(q->full); // signal for full
-	
-	
+	// signal for full
+	sem_post(q->full);
+	// end timing
 	struct timeval *end = malloc(sizeof(struct timeval));
 	gettimeofday(end, NULL);
 	q->enqueueTime += (end->tv_sec - start->tv_sec) * 1000 +
@@ -74,11 +73,12 @@ void EnqueueString(Queue *q, char *string) {
  * from the queue.
  */
 char * DequeueString(Queue *q) {
-	sleep(1);
+	//start timing
 	struct timeval *start = malloc(sizeof(struct timeval));
 	gettimeofday(start, NULL);
-	sem_wait(q->full); // wait for full
-	
+	// wait for any full
+	sem_wait(q->full);
+	// acquire the lock
 	sem_wait(q->mutex);
 	char *string = (q->data)[(q->dequeueCount) % (q->size)];
 	(q->data)[(q->dequeueCount) % (q->size)] = NULL;
@@ -86,8 +86,9 @@ char * DequeueString(Queue *q) {
 	printf("dequeued: %s\tqueue: ", string);
 	printQueue(q);
 	sem_post(q->mutex);
-	
-	sem_post(q->empty); // signal for empty
+	// signal for empty
+	sem_post(q->empty);
+	// end timing
 	struct timeval *end = malloc(sizeof(struct timeval));
 	gettimeofday(end, NULL);
 	q->dequeueTime += (end->tv_sec - start->tv_sec) * 1000 +

@@ -1,16 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <pthread.h>
 #include "queue.h"
 
 Queue *q;
 
 void *enqueue_test(void *arg) {
+	sleep(1);
 	EnqueueString(q, arg);
 	return NULL;
 }
 
 void *dequeue_test(void *arg) {
+	sleep(2);
 	DequeueString(q);
 	return arg;
 }
