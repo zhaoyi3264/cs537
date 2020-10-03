@@ -1,4 +1,7 @@
 #include <semaphore.h>
+#include <sys/time.h>
+
+// TODO: senital constant
 
 typedef struct Queue {
 	int size;
@@ -9,8 +12,8 @@ typedef struct Queue {
 	
 	int enqueueCount;
 	int dequeueCount;
-	int enqueueTime;
-	int dequeueTime;
+	suseconds_t enqueueTime;
+	suseconds_t dequeueTime;
 } Queue;
 
 Queue *CreateStringQueue(int size);
