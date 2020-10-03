@@ -1,8 +1,6 @@
 #include <semaphore.h>
 #include <sys/time.h>
 
-// TODO: senital constant
-
 typedef struct Queue {
 	int size;
 	char **data;
