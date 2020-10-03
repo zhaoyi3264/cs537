@@ -72,6 +72,7 @@ void EnqueueString(Queue *q, char *string) {
 		struct timeval *res = malloc(sizeof(struct timeval));
 		timersub(end, start, res);
 		q->enqueueTime += res->tv_sec * 10e6 + res->tv_usec;
+		free(res);
 	}
 	free(end);
 	free(start);
@@ -109,6 +110,7 @@ char * DequeueString(Queue *q) {
 		struct timeval *res = malloc(sizeof(struct timeval));
 		timersub(end, start, res);
 		q->dequeueTime += res->tv_sec * 10e6 + res->tv_usec;
+		free(res);
 	}
 	free(end);
 	free(start);
