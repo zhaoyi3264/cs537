@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <strings.h>
 #include <pthread.h>
 
 #include "queue.h"
