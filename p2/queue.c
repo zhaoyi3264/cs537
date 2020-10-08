@@ -3,18 +3,6 @@
 #include <sys/time.h>
 #include "queue.h"
 
-void printQueue(Queue *q) {
-	printf("queue: ");
-	for(int i = 0; i < q->size; i++) {
-		if ((q->data)[i]) {
-			printf("%.5s - ", (q->data)[i]);
-		} else {
-			printf("%s - ", "empty");
-		}
-	}
-	printf("\n");
-}
-
 /*
  * Dynamically allocate a new Queue structure and initialize it with an array of
  * character points of length size. That means you'll malloc the queue structure
@@ -29,10 +17,7 @@ Queue *CreateStringQueue(int size) {
 	Queue *q = malloc(sizeof(Queue));
 	q->data = malloc(size * sizeof(char *));
 	q->size = size;
-	q->enqueueCount = 0;
-	q->dequeueCount = 0;
-	q->enqueueTime = 0;
-	q->dequeueTime = 0;
+	q->stat = malloc(sizeof(Statistics *));
 	
 	q->mutex = malloc(sizeof(sem_t));
 	q->empty = malloc(sizeof(sem_t));
@@ -55,25 +40,15 @@ void EnqueueString(Queue *q, char *string) {
 	sem_wait(q->empty);
 	// acquire the lock
 	sem_wait(q->mutex);
-	(q->data)[(q->enqueueCount) % (q->size)] = string;
-	if (string) {
-		q->enqueueCount += 1;
-	}
-	// debug
-	//~ printf("enqueued: %s", string);
-	//~ printQueue(q);
-	sem_post(q->mutex);
-	// signal for full
-	sem_post(q->full);
+	(q->data)[(q->stat->enqueueCount++) % (q->size)] = string;
 	// end timing
 	struct timeval *end = malloc(sizeof(struct timeval));
 	gettimeofday(end, NULL);
-	if (string) {
-		struct timeval *res = malloc(sizeof(struct timeval));
-		timersub(end, start, res);
-		q->enqueueTime += res->tv_sec * 10e6 + res->tv_usec;
-		free(res);
-	}
+	update_enqueue(q->stat, start, end);
+	// release the lock
+	sem_post(q->mutex);
+	// signal for full
+	sem_post(q->full);
 	free(end);
 	free(start);
 }
@@ -92,26 +67,17 @@ char * DequeueString(Queue *q) {
 	sem_wait(q->full);
 	// acquire the lock
 	sem_wait(q->mutex);
-	char *string = (q->data)[(q->dequeueCount) % (q->size)];
-	(q->data)[(q->dequeueCount) % (q->size)] = NULL;
-	if (string) {
-		q->dequeueCount += 1;
-	}
-	// debug
-	//~ printf("dequeued: %s", string);
-	//~ printQueue(q);
-	sem_post(q->mutex);
-	// signal for empty
-	sem_post(q->empty);
+	char *string = (q->data)[(q->stat->dequeueCount) % (q->size)];
+	(q->data)[(q->stat->dequeueCount++) % (q->size)] = NULL;
 	// end timing
 	struct timeval *end = malloc(sizeof(struct timeval));
 	gettimeofday(end, NULL);
-	if (string) {
-		struct timeval *res = malloc(sizeof(struct timeval));
-		timersub(end, start, res);
-		q->dequeueTime += res->tv_sec * 10e6 + res->tv_usec;
-		free(res);
-	}
+	//update stat
+	update_dequeue(q->stat, start, end);
+	// release the lock
+	sem_post(q->mutex);
+	// signal for empty
+	sem_post(q->empty);
 	free(end);
 	free(start);
 	return string;
@@ -122,8 +88,11 @@ char * DequeueString(Queue *q) {
  * details).
  */
 void PrintQueueStats(Queue *q) {
-	fprintf(stderr, "enqueueCount:\t%.2d\n", q->enqueueCount);
-	fprintf(stderr, "dequeueCount:\t%.2d\n", q->dequeueCount);
-	fprintf(stderr, "enqueueTime:\t%f\n", q->enqueueTime / 10e6);
-	fprintf(stderr, "dequeueTime:\t%f\n", q->dequeueTime / 10e6);
+	sem_wait(q->mutex);
+	Statistics *stat = q->stat;
+	fprintf(stderr, "enqueueCount:\t%.2d\n", stat->enqueueCount);
+	fprintf(stderr, "dequeueCount:\t%.2d\n", stat->dequeueCount);
+	fprintf(stderr, "enqueueTime:\t%.3f\n", stat->enqueueTime / 10e6);
+	fprintf(stderr, "dequeueTime:\t%.3f\n", stat->dequeueTime / 10e6);
+	sem_post(q->mutex);
 }

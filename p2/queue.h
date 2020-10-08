@@ -1,5 +1,5 @@
 #include <semaphore.h>
-#include <sys/time.h>
+#include "statistics.h"
 
 typedef struct Queue {
 	int size;
@@ -7,11 +7,7 @@ typedef struct Queue {
 	sem_t *mutex;
 	sem_t *empty;
 	sem_t *full;
-	
-	int enqueueCount;
-	int dequeueCount;
-	suseconds_t enqueueTime;
-	suseconds_t dequeueTime;
+	Statistics *stat;
 } Queue;
 
 Queue *CreateStringQueue(int size);
