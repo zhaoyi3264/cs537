@@ -1,4 +1,16 @@
+/*
+ * Main driver module
+ * 
+ * Authors: 
+ * - Zhaoyi Zhang, netid: zzhang825
+ * - Richard Li, netid: tli354
+ */
+
+#ifndef QUEUE_H
+#define QUEUE_H
+
 #include <semaphore.h>
+
 #include "statistics.h"
 
 typedef struct Queue {
@@ -17,3 +29,5 @@ void EnqueueString(Queue *q, char *string);
 char * DequeueString(Queue *q);
 
 void PrintQueueStats(Queue *q);
+
+#endif

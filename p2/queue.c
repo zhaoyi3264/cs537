@@ -1,98 +1,142 @@
+/*
+ * String queue module
+ * 
+ * Authors: 
+ * - Zhaoyi Zhang, netid: zzhang825
+ * - Richard Li, netid: tli354
+ */
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+
 #include "queue.h"
 
 /*
- * Dynamically allocate a new Queue structure and initialize it with an array of
- * character points of length size. That means you'll malloc the queue structure
- * and then malloc the char ** array pointed to from that structure. Also
- * remember to any state and synchronization variables used in this structure.
+ * Create a new string queue struct and return its pointer
  * 
- * The function returns a pointer to the new queue structure.
+ * size: size of the queue
  * 
- * For testing purposes, create your Queue's with a size of 10.
+ * return: the pointer to the queue struct
  */
 Queue *CreateStringQueue(int size) {
 	Queue *q = malloc(sizeof(Queue));
+	if (q == NULL) {
+		exit(1);
+	}
 	q->data = malloc(size * sizeof(char *));
+	if (q->data == NULL) {
+		exit(1);
+	}
 	q->size = size;
-	q->stat = malloc(sizeof(Statistics *));
+	q->stat = create_stat();
 	
 	q->mutex = malloc(sizeof(sem_t));
 	q->empty = malloc(sizeof(sem_t));
 	q->full = malloc(sizeof(sem_t));
-	sem_init(q->mutex, 0, 1);
-	sem_init(q->empty, 0, size);
-	sem_init(q->full, 0, 0);
+	if (q->mutex == NULL || q->empty == NULL || q->full == NULL) {
+		exit(1);
+	}
+	if (sem_init(q->mutex, 0, 1) || sem_init(q->empty, 0, size) ||
+		sem_init(q->full, 0, 0)) {
+		fprintf(stderr, "error in semaphore initialization\n");
+		exit(1);
+	}
 	return q;
 }
 
 /*
- * This function places the pointer to the string at the end of queue q. If the
- * queue is full, then this function blocks until there is space available.
+ * Enqueue a string into the queue and update the queue statistics. Blocks until
+ * there are free space in the queue
+ * 
+ * q: queue struct
+ * string: string to enqueue
  */
 void EnqueueString(Queue *q, char *string) {
 	// start timing
 	struct timeval *start = malloc(sizeof(struct timeval));
-	gettimeofday(start, NULL);
+	if (start == NULL || gettimeofday(start, NULL)) {
+		exit(1);
+	}
 	// wait for any empty
-	sem_wait(q->empty);
+	if (sem_wait(q->empty)) {
+		fprintf(stderr, "error in semaphore wait operation\n");
+		exit(1);
+	}
 	// acquire the lock
-	sem_wait(q->mutex);
+	if (sem_wait(q->mutex)) {
+		fprintf(stderr, "error in semaphore wait operation\n");
+		exit(1);
+	}
 	(q->data)[(q->stat->enqueueCount++) % (q->size)] = string;
+	// release the lock and signal for full
+	if (sem_post(q->mutex)) {
+		fprintf(stderr, "error in semaphore post operation\n");
+		exit(1);
+	}
+	if (sem_post(q->full)) {
+		fprintf(stderr, "error in semaphore post operation\n");
+		exit(1);
+	}
 	// end timing
-	struct timeval *end = malloc(sizeof(struct timeval));
-	gettimeofday(end, NULL);
-	update_enqueue(q->stat, start, end);
-	// release the lock
-	sem_post(q->mutex);
-	// signal for full
-	sem_post(q->full);
-	free(end);
+	end_timer(q->stat, start, 1);
 	free(start);
 }
 
 /*
- * This function removes a pointer to a string from the beginning of queue q.
- * If the queue is empty, then this function blocks until there is a string
- * placed into the queue. This function returns the pointer that was removed
- * from the queue.
+ * Remove a string from the queue and update queue statistics. Blocks until there
+ * are strings in the queue
+ * 
+ * q: queue struct
+ * 
+ * return: string dequeued
  */
 char * DequeueString(Queue *q) {
 	//start timing
 	struct timeval *start = malloc(sizeof(struct timeval));
-	gettimeofday(start, NULL);
+	if (start == NULL || gettimeofday(start, NULL)) {
+		exit(1);
+	}
 	// wait for any full
-	sem_wait(q->full);
+	if (sem_wait(q->full)) {
+		fprintf(stderr, "error in semaphore wait operation\n");
+		exit(1);
+	}
 	// acquire the lock
-	sem_wait(q->mutex);
+	if (sem_wait(q->mutex)) {
+		fprintf(stderr, "error in semaphore wait operation\n");
+		exit(1);
+	}
 	char *string = (q->data)[(q->stat->dequeueCount) % (q->size)];
 	(q->data)[(q->stat->dequeueCount++) % (q->size)] = NULL;
+	// release the lock and signal for empty
+	if (sem_post(q->mutex)) {
+		fprintf(stderr, "error in semaphore post operation\n");
+		exit(1);
+	}
+	if (sem_post(q->empty)) {
+		fprintf(stderr, "error in semaphore post operation\n");
+		exit(1);
+	}
 	// end timing
-	struct timeval *end = malloc(sizeof(struct timeval));
-	gettimeofday(end, NULL);
-	//update stat
-	update_dequeue(q->stat, start, end);
-	// release the lock
-	sem_post(q->mutex);
-	// signal for empty
-	sem_post(q->empty);
-	free(end);
+	end_timer(q->stat, start, 0);
 	free(start);
 	return string;
 }
 
 /*
- * This function prints the statistics for this queue (see the next section for
- * details).
+ * Print the statistics of the queue
+ * 
+ * q: queue to print statistics
  */
 void PrintQueueStats(Queue *q) {
-	sem_wait(q->mutex);
-	Statistics *stat = q->stat;
-	fprintf(stderr, "enqueueCount:\t%.2d\n", stat->enqueueCount);
-	fprintf(stderr, "dequeueCount:\t%.2d\n", stat->dequeueCount);
-	fprintf(stderr, "enqueueTime:\t%.3f\n", stat->enqueueTime / 10e6);
-	fprintf(stderr, "dequeueTime:\t%.3f\n", stat->dequeueTime / 10e6);
-	sem_post(q->mutex);
+	if (sem_wait(q->mutex)) {
+		fprintf(stderr, "error in semaphore wait operation\n");
+		exit(1);
+	}
+	print_stat(q->stat);
+	if (sem_post(q->mutex)) {
+		fprintf(stderr, "error in semaphore post operation\n");
+		exit(1);
+	}
 }

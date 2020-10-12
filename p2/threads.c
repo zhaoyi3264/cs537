@@ -1,3 +1,11 @@
+/*
+ * Main driver module
+ * 
+ * Authors: 
+ * - Zhaoyi Zhang, netid: zzhang825
+ * - Richard Li, netid: tli354
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -6,6 +14,13 @@
 
 #include "queue.h"
 
+/*
+ * Runnable for reader thread. Read inputs from stdin
+ * 
+ * args: queue struct
+ * 
+ * return: NULL
+ */
 void *reader(void *args) {
 	Queue *rd_to_m1 = (Queue *)args;
 	int buf_limit = 4096;
@@ -14,6 +29,9 @@ void *reader(void *args) {
 	int size = 0;
 	while (1) {
 		buf = malloc(buf_size);
+		if (buf == NULL) {
+			exit(1);
+		}
 		size = getline(&buf, &buf_size, stdin);
 		// exit on sentinel value
 		if (size < 1) {
@@ -30,6 +48,13 @@ void *reader(void *args) {
 	return NULL;
 }
 
+/*
+ * Runnable for munch1 thread. Convert the space in the string to '*'
+ * 
+ * args: queue structs
+ * 
+ * return: NULL
+ */
 void *munch1(void *args) {
 	Queue **munch1_args = (Queue **)args;
 	Queue *rd_to_m1 = munch1_args[0];
@@ -53,6 +78,14 @@ void *munch1(void *args) {
 	return NULL;
 }
 
+/*
+ * Runnable for munch2 thread. Convert lower case letters in the string to upper
+ * case ones
+ * 
+ * args: queue structs
+ * 
+ * return: NULL
+ */
 void *munch2(void *args) {
 	Queue **munch2_args = (Queue **)args;
 	Queue *m1_to_m2 = munch2_args[0];
@@ -76,6 +109,13 @@ void *munch2(void *args) {
 	return NULL;
 }
 
+/*
+ * Runnable for writer thread. Write the string to stdout
+ * 
+ * args: queue struct
+ * 
+ * return: NULL
+ */
 void *writer(void *args) {
 	Queue *m2_to_wt = (Queue *)args;
 	char *buf;
@@ -83,6 +123,8 @@ void *writer(void *args) {
 		buf = DequeueString(m2_to_wt);
 		// exit on sentinel value
 		if (buf == NULL) {
+			printf("\nWriter processed %d strings\n",
+				m2_to_wt->stat->dequeueCount - 1);
 			pthread_exit(NULL);
 		}
 		// print to stdout and free the buffer
