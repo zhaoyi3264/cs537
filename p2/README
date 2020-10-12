@@ -1,0 +1,1 @@
+In this project, I wrote a multi-thread program that can read the input from the standard input, process it using different threads, and write the processed string to the standard output. A blocking queue is used to pass string between threads and ensure synchronization.
