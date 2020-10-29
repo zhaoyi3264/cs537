@@ -31,22 +31,22 @@ void parse_makefile (char *fname) {
 			}
 			// TODO: split on multiple white spaces
 			token = strtok(line, ":");
-			printf("target: %s\n", token);
+			//~ printf("target: %s\n", token);
 			spec_node = create_spec_node(token);
 			dep_string = strtok(NULL, ":");
 			//~ printf("dep string: %s\n", dep_string);
 			token = strtok(dep_string, " ");
-			printf("target: %s dep: %s\n", spec_node->target, token);
+			//~ printf("target: %s dep: %s\n", spec_node->target, token);
 			add_dependency(spec_node, token);
 			while ((token = strtok(NULL, " "))) {
-				printf("target: %s dep: %s\n", spec_node->target, token);
+				//~ printf("target: %s dep: %s\n", spec_node->target, token);
 				add_dependency(spec_node, token);
 			}
 			token = NULL;
 		// a command line
 		} else if (line[0] == '\t') {
-			printf("target: %s command: %s\n", spec_node->target, line + 1);
-			add_command(spec_node, line);
+			//~ printf("target: %s command: %s\n", spec_node->target, line + 1);
+			add_command(spec_node, line + 1);
 		} else {
 			//~ printf("skip something else: %s\n", line);
 		}
@@ -55,7 +55,5 @@ void parse_makefile (char *fname) {
 		add_spec_node(spec_graph, spec_node);
 	}
     print_spec_graph(spec_graph);
-    printf("closing file\n");
-	printf("%d\n", fclose(fp));
-	printf("closed file\n");
+	fclose(fp);
 }

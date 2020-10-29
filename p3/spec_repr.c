@@ -11,53 +11,30 @@ Node *create_node(char *data) {
 }
 
 SpecNode *create_spec_node(char *target) {
-	SpecNode *spec_node = malloc(sizeof(spec_node));
-	spec_node->target = malloc(sizeof(char) * 128);
-	spec_node->dependencies = NULL;
-	spec_node->dependencies_tail = NULL;
-	spec_node->commands = NULL;
-	spec_node->commands_tail = NULL;
-	spec_node->next = NULL;
-	printf("create node: %s\n", target);
+	SpecNode *spec_node = malloc(sizeof(SpecNode));
+ 	spec_node->target = malloc(sizeof(char) * 128); // don't hard code
 	sprintf(spec_node->target, "%s", target);
-	//~ spec_node->target = "TARGET";
-	printf("%p\n", spec_node->dependencies);
-	printf("%p\n", spec_node->dependencies_tail);
-	printf("%p\n", spec_node->commands);
-	printf("%p\n", spec_node->commands_tail);
-	//~ printf("%p\n", spec_node->commands);
 	return spec_node;
 }
 
 void add_dependency(SpecNode *spec_node, char *dependency) {
-	//~ Node *node = create_node(dependency);
-	//~ if (spec_node->dependencies) {
-		//~ spec_node->dependencies_tail->next = node;
-	//~ } else {
-		//~ spec_node->dependencies = node;
-	//~ }
-	//~ spec_node->dependencies_tail = node;
+	Node *node = create_node(dependency);
 	if (spec_node->dependencies) {
-		Node *current = spec_node->dependencies;
-		while (current->next) {
-			current = current->next;
-		}
-		current->next = create_node(dependency);
+		spec_node->dependencies_tail->next = node;
 	} else {
-		spec_node->dependencies = create_node(dependency);
+		spec_node->dependencies = node;
 	}
+	spec_node->dependencies_tail = node;
 }
 
 void add_command(SpecNode *spec_node, char *command) {
+	Node *node = create_node(command);
 	if (spec_node->commands) {
-		Node *current = spec_node->commands;
-		while (current->next) {
-			current = current->next;
-		}
-		current->next = create_node(command);
+		spec_node->commands_tail->next = node;
 	} else {
-		spec_node->commands = create_node(command);
+		spec_node->commands = node;
 	}
+	spec_node->commands_tail = node;
 }
 
 void print_dependency(SpecNode *spec_node) {

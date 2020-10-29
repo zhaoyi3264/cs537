@@ -16,6 +16,10 @@ spec_repr.o: spec_repr.c spec_repr.h
 
 spec_graph.o: spec_graph.c spec_graph.h spec_repr.h
 	$(CC) $(WARNING_FLAGS) -c spec_graph.c
+	
+test: test.c
+	$(CC) $(WARNING_FLAGS) test.c -o out
+	./out
 
 clean:
 	rm $(EXE) *.o
