@@ -3,57 +3,133 @@
 #include <string.h>
 #include <strings.h>
 
-#include "spec_repr.h"
-#include "spec_graph.h"
+#include "text_parsing.h"
 
-void parse_makefile (char *fname) {
+int is_blank(char *line) {
+	for (int i = 0; line[i]; i++) {
+		if (line[i] != ' ' && line[i] != '\t') {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int is_target (char *line) {
+	char c = line[0];
+	if (c == '\0') {
+		return 0;
+	}
+	if (c != ':' && c != ' ' && index(line, ':')) {
+		return 1;
+	}
+	return 0;
+}
+
+int is_cmd (char *line) {
+	char c = line[0];
+	if (c == '\0') {
+		return 0;
+	}
+	if (c == '\t' && !is_blank(line)) {
+		return 1;
+	}
+	return 0;
+}
+
+void update_graph(SpecGraph* spec_graph, SpecNode *spec_node,
+	int line_num_target, char *line_target) {
+	if (spec_node) {
+		int has_cycle = add_spec_node(spec_graph, spec_node);
+		if (has_cycle){
+			fprintf(stderr, "%d: cycle in the dependency chain: %s\n",
+				line_num_target, line_target);
+			exit(1);
+		}
+	}
+}
+
+SpecGraph *parse_makefile (char *fname) {
+	int max_size = 4096;
 	FILE *fp = fopen(fname, "r");
+    
+	int c;
+	int idx;
+	
 	char * line = NULL;
-    size_t len = 0;
-    int size;
-    int buf_limit = 4096;
+    int line_num = 0;
+    char *line_target = malloc(sizeof(char) * max_size);
+    int line_num_target = 0;
+    
 	SpecNode *spec_node = NULL;
 	SpecGraph *spec_graph = malloc(sizeof(SpecGraph));
-    while ((size = getline(&line, &len, fp)) != -1) {
-		if (size > buf_limit) {
-			fprintf(stderr, "error: the line is too long\n");
-			continue;
+	
+	do {
+		// read line
+		idx = 0;
+		line = malloc(sizeof(char) * max_size);
+		do {
+			c = fgetc(fp);
+			if (c == '\0') {
+				fprintf(stderr, "%d: null byte found: %s\n", line_num, line);
+			}
+			line[idx++] = (char) c;
+		} while (c != '\n' && c != EOF && idx < max_size);
+		line_num++;
+		if (idx >= max_size) {
+			fprintf(stderr, "%d: line length exceeds the buffer size: %s\n",
+				line_num, line);
+			exit(1);
+		} else {
+			line[idx - 1] = '\0';
 		}
 		
-		line[size - 1] = '\0';
 		char *dep_string = NULL;
 		char *token = NULL;
+		char *ws = NULL;
 		// a target line
-		if (index(line, ':')) {
-			if (spec_node) {
-				add_spec_node(spec_graph, spec_node);
-				spec_node = NULL;
+		if (is_target(line)) {
+			//~ printf("target: %s\n", line);
+			update_graph(spec_graph, spec_node, line_num_target, line_target);
+			sprintf(line_target, "%s", line);
+			line_num_target = line_num;
+			// replace tabs with spaces
+			while ((ws = index(line, '\t'))) {
+				*ws = ' ';
 			}
-			// TODO: split on multiple white spaces
 			token = strtok(line, ":");
-			//~ printf("target: %s\n", token);
-			spec_node = create_spec_node(token);
-			dep_string = strtok(NULL, ":");
-			//~ printf("dep string: %s\n", dep_string);
-			token = strtok(dep_string, " ");
-			//~ printf("target: %s dep: %s\n", spec_node->target, token);
-			add_dependency(spec_node, token);
-			while ((token = strtok(NULL, " "))) {
-				//~ printf("target: %s dep: %s\n", spec_node->target, token);
-				add_dependency(spec_node, token);
+			// replace the first space with null byte
+			if ((ws = index(token, ' '))) {
+				*ws = '\0';
 			}
-			token = NULL;
+			spec_node = create_spec_node(token);
+			if ((dep_string = strtok(NULL, ":")) &&
+				(token = strtok(dep_string, " "))) {
+				add_dependency(spec_node, token);
+				while ((token = strtok(NULL, " "))) {
+					add_dependency(spec_node, token);
+				}
+			}
 		// a command line
-		} else if (line[0] == '\t') {
-			//~ printf("target: %s command: %s\n", spec_node->target, line + 1);
+		} else if (is_cmd(line)) {
+			//~ printf("command: %s\n", line);
 			add_command(spec_node, line + 1);
+		// a comment line
+		} else if (line[0] == '#') {
+			//~ printf("comment: %s\n", line);
+			continue;
+		// blank
+		} else if (is_blank(line)) {
+			//~ printf("blank: %s\n", line);
+			continue;
+		// error
 		} else {
-			//~ printf("skip something else: %s\n", line);
+			fprintf(stderr, "%d: invalid line: %s\n", line_num, line);
+			exit(1);
 		}
-    }
-	if (spec_node) {
-		add_spec_node(spec_graph, spec_node);
-	}
-    print_spec_graph(spec_graph);
+		free(line);
+	} while (c != EOF);
+	update_graph(spec_graph, spec_node, line_num_target, line_target);
 	fclose(fp);
+	free(line_target);
+	return spec_graph;
 }

@@ -1,23 +1,21 @@
-537ps: 537ps.o readproc.o parseopts.o output.o
-	gcc -o 537ps 537ps.o readproc.o parseopts.o output.o
+a: b
+	echo
+b: c
+	echo
+# c: a
+	echo
+537ps: 537ps.o readproc.o parseopts.o output.o    
+	gcc -o 537ps 537ps.o readproc.o parseopts.o output.o	
 	echo built successfully....
-
-537ps.o: 537ps.c 537ps.h readproc.h parseopts.h
+537ps.o: 537ps.c 537ps.h readproc.h parseopts.h  
 	gcc -c -Wall -Wextra 537ps.c
-	echo something
-	echo something
-
 readproc.o: readproc.c readproc.h
 	gcc -c -Wall -Wextra readproc.c
-	echo something
-	echo something
-
 parseopts.o: parseopts.c parseopts.h
 	gcc -c -Wall -Wextra parseopts.c
-	echo something
-	echo something
-
 output.o: output.c
 	gcc -c -Wall -Wextra output.c
+scan: something
 	echo something
-	echo something
+clean: 
+	rm *.o

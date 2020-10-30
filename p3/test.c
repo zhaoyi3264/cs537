@@ -1,25 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
-
-typedef struct Node {
-	char *data;
-	struct Node *next;
-} Node;
+#include <string.h>
 
 int main() {
-	Node *head = malloc(sizeof(Node));
-	head->data = "target";
-	Node *current = head;
-	for (int i = 0; i < 10; i++) {
-		char *buf = malloc(sizeof(char) * 10);
-		current->next = malloc(sizeof(Node));
-		current = current->next;
-		sprintf(buf, "%d", i);
-		current->data = buf;
-	}
-	current = head;
-	while (current) {
-		printf("%s\n", current->data);
-		current = current->next;
-	}
+	FILE *fp = fopen("test", "r");
+	int c;
+	int index = 0;
+	do {
+		char *line = malloc(sizeof(char) * 4096);
+		do {
+			c = fgetc(fp);
+			if (c == '\0') {
+				fprintf(stderr, "Null character encountered at line No %d. Exiting the program", 1);
+			}
+			line[index++] = (char) c;
+		} while (c != '\n' && c != EOF && index < 4096);
+
+		if (index >= 4096) {
+			fprintf(stderr, "THIS LINE EXHAUSTED THE BUFFER SIZE %d. Terminating the program\n", 4096);
+			free(line);
+			exit(1);
+		} else {
+			line[index - 1] = '\0';
+		}
+		printf("%s\n", line);
+		index = 0;
+		free(line);
+	} while (c != EOF);
 }

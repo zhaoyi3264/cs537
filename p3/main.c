@@ -3,5 +3,6 @@
 #include "text_parsing.h"
 
 int main () {
-	parse_makefile("test");
+	SpecGraph *spec_graph = parse_makefile("test");
+	print_spec_graph(spec_graph);
 }
