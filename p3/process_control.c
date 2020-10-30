@@ -13,7 +13,7 @@ void createProcess(SpecNode *spec_node) {
 	
     pid_t pid;
     int buf_limit = 4096;
-	char* argv[buf_limit];
+    char* argv[buf_limit];
     int status;
 
     char command_line = spec_node->commands->data;
