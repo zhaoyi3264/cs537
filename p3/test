@@ -1,5 +1,6 @@
 a: b
-	echo
+	wc -l test
+	wc -l makefile
 b: c
 	echo
 # c: a

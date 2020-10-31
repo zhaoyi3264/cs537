@@ -1,3 +1,8 @@
+#ifndef PROCESS_CONTROL_H
+#define PROCESS_CONTROL_H
+
 #include "spec_repr.h"
 
-void createProcess(SpecNode *spec_node);
+void create_process(SpecNode *spec_node);
+
+#endif

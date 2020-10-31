@@ -1,3 +1,7 @@
+#ifndef SPEC_REPR_H
+#define SPEC_REPR_H
+
+// TODO: record line_num
 typedef struct Node {
 	char *data;
 	struct Node *next;
@@ -21,3 +25,5 @@ void add_command(SpecNode *spec_node, char *command);
 void print_dependency(SpecNode *spec_node);
 
 void print_command(SpecNode *spec_node);
+
+#endif

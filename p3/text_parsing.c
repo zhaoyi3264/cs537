@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +8,7 @@
 
 int is_blank(char *line) {
 	for (int i = 0; line[i]; i++) {
-		if (line[i] != ' ' && line[i] != '\t') {
+		if (isspace(line[i]) != 0) {
 			return 0;
 		}
 	}

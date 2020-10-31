@@ -9,46 +9,52 @@
 
 #include "process_control.h"
 
-void createProcess(SpecNode *spec_node) {
-	
-    pid_t pid;
-    int buf_limit = 4096;
-    char* argv[buf_limit];
-    int status;
+int get_argc(char *cmd) {
+	char *str = malloc(sizeof(char) * strlen(cmd));
+	sprintf(str, "%s", cmd);
+	char *token = strtok(str, " ");
+	int count = 0;
+	while ((token = strtok(NULL, " "))) {
+		count++;
+	}
+	return count;
+}
 
-    char *command_line = spec_node->commands->data;
+void create_process(SpecNode *spec_node) {
+	Node *current = spec_node->commands;
+	while (current) {
+		pid_t pid;
+		int stat_loc;
+		pid = fork();
 
-    for (int i = 0; i <buf_limit; i++) {
-        argv[i] = NULL;
-    }
-
-    pid = fork();
-
-    if (pid < 0) {
-        fprintf(stderr, "Error: Fork failed\n");
-        exit(-1);
-    } else if (pid ==0) {
-        int i = 0;
-        char *split = strtok(command_line, " ");
-
-        while (split) {
-            argv[i] = split;
-            i++;
-            split = strtok(NULL, " ");
-        }
-
-        if (argv[0] == NULL) {
-            fprintf(stderr, "Error: Command not found\n");
-            exit(-1);
-        }
-
-        if (execvp(argv[0], argv)) {
-            fprintf(stderr, "Error: execvp failed\n");
-            exit(-1);
-        }
-    } else {
-        while(wait(&status) != pid){
-            // waiting
-        }
-    } 
+		if (pid == 0) {
+			char *cmd = current->data;
+			// replace tabs with spaces
+			char *ws = NULL;
+			while ((ws = index(cmd, '\t'))) {
+				*ws = ' ';
+			}
+			int argc = get_argc(cmd);
+			char *argv[argc + 1];
+			argv[argc] = NULL;
+			
+			char *file = strtok(cmd, " ");
+			char *token;
+			for (int i = 0; i < argc; i++) {
+				token = strtok(NULL, " ");
+				argv[i] = malloc(sizeof(char) * strlen(token));
+				sprintf(argv[i], "%s", token);
+			}
+			if (execvp(file, argv)) {
+				fprintf(stderr, "Error: execvp failed\n");
+				exit(-1);
+			}
+		} else if (pid < 0) {
+			fprintf(stderr, ": Fork failed\n");
+			exit(1);
+		} else {
+			waitpid(pid, &stat_loc, 0);
+		}
+		current = current->next;
+	}
 }

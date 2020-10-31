@@ -1,16 +1,17 @@
 #include <stdio.h>
 
+#include "process_control.h"
 #include "text_parsing.h"
 
-void function(graph, dep) {
-	// find node with (target == dep)
-	for each dep' of dep
-		funtion(graph, dep')
-	// if not found, the dep is a file, do nothing
-	if dep is outdated
-		executed command // process control
-	return
-}
+//~ void function(graph, dep) {
+	//~ // find node with (target == dep)
+	//~ for each dep' of dep
+		//~ funtion(graph, dep')
+	//~ // if not found, the dep is a file, do nothing
+	//~ if dep is outdated
+		//~ executed command // process control
+	//~ return
+//~ }
 
 // command line parsing
 
@@ -19,4 +20,5 @@ void function(graph, dep) {
 int main () {
 	SpecGraph *spec_graph = parse_makefile("test");
 	print_spec_graph(spec_graph);
+	create_process(spec_graph->head);
 }
