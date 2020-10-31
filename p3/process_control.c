@@ -6,8 +6,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+
 #include "process_control.h"
-#include "spec_repr.h"
 
 void createProcess(SpecNode *spec_node) {
 	
@@ -16,20 +16,18 @@ void createProcess(SpecNode *spec_node) {
     char* argv[buf_limit];
     int status;
 
-    char command_line = spec_node->commands->data;
+    char *command_line = spec_node->commands->data;
 
-    for(int i = 0; i <buf_limit; i++) {
+    for (int i = 0; i <buf_limit; i++) {
         argv[i] = NULL;
     }
 
     pid = fork();
 
-    if(pid < 0){
+    if (pid < 0) {
         fprintf(stderr, "Error: Fork failed\n");
         exit(-1);
-    }
-
-    else if(pid ==0){
+    } else if (pid ==0) {
         int i = 0;
         char *split = strtok(command_line, " ");
 
@@ -44,12 +42,11 @@ void createProcess(SpecNode *spec_node) {
             exit(-1);
         }
 
-        if(execvp(argv[0], argv)){
+        if (execvp(argv[0], argv)) {
             fprintf(stderr, "Error: execvp failed\n");
             exit(-1);
         }
-    }
-    else {
+    } else {
         while(wait(&status) != pid){
             // waiting
         }

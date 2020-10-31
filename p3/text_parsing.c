@@ -86,8 +86,12 @@ SpecGraph *parse_makefile (char *fname) {
 		char *dep_string = NULL;
 		char *token = NULL;
 		char *ws = NULL;
+		// a comment line
+		if (line[0] == '#') {
+			//~ printf("comment: %s\n", line);
+			continue;
 		// a target line
-		if (is_target(line)) {
+		} else if (is_target(line)) {
 			//~ printf("target: %s\n", line);
 			update_graph(spec_graph, spec_node, line_num_target, line_target);
 			sprintf(line_target, "%s", line);
@@ -113,10 +117,6 @@ SpecGraph *parse_makefile (char *fname) {
 		} else if (is_cmd(line)) {
 			//~ printf("command: %s\n", line);
 			add_command(spec_node, line + 1);
-		// a comment line
-		} else if (line[0] == '#') {
-			//~ printf("comment: %s\n", line);
-			continue;
 		// blank
 		} else if (is_blank(line)) {
 			//~ printf("blank: %s\n", line);
