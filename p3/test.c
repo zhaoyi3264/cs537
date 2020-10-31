@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int main() {
+void fork_test() {
 	int stat_loc;
 	pid_t pid = fork();
 	if (pid == 0) {
@@ -17,5 +17,9 @@ int main() {
 	} else {
 		waitpid(pid, &stat_loc, 0);
 		printf("parent with child exit %d\n", stat_loc);
-	}
+	}	
+}
+
+int main() {
+	
 }

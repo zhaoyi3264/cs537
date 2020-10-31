@@ -1,14 +1,16 @@
 a: b
-	wc -l test
-	wc -l makefile
+	wc -l	 test
+	wc 		-l makefile
 b: c
-	echo
+	wc -l main.c
+	ls
+	echo		 something something something something
 # c: a
-	echo
-537ps: 537ps.o readproc.o parseopts.o output.o    
-	gcc -o 537ps 537ps.o readproc.o parseopts.o output.o	
+	echo something
+537ps: 537ps.o readproc.o parseopts.o output.o
+	gcc -o 537ps 537ps.o readproc.o parseopts.o output.o
 	echo built successfully....
-537ps.o: 537ps.c 537ps.h readproc.h parseopts.h  
+537ps.o: 537ps.c 537ps.h readproc.h parseopts.h
 	gcc -c -Wall -Wextra 537ps.c
 readproc.o: readproc.c readproc.h
 	gcc -c -Wall -Wextra readproc.c

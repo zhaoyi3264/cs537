@@ -58,6 +58,7 @@ int check_cycle(SpecGraph *spec_graph) {
 }
 
 int add_spec_node(SpecGraph *spec_graph, SpecNode *spec_node) {
+	// TODO: check duplicate
 	if (spec_graph->head) {
 		spec_graph->tail->next = spec_node;
 	} else {

@@ -51,7 +51,22 @@ void update_graph(SpecGraph* spec_graph, SpecNode *spec_node,
 
 SpecGraph *parse_makefile (char *fname) {
 	int max_size = 4096;
-	FILE *fp = fopen(fname, "r");
+	FILE *fp;
+	if (fname) {
+		 fp = fopen(fname, "r");
+	} else {
+		char *file[] = {"makefile", "Makefile"};
+		for (int i = 0; i < 2; i++) {
+			fp = fopen(file[i], "r");
+			if (fp) {
+				break;
+			}
+		}
+		if (fp == NULL) {
+			fprintf(stderr, "error: cannot find makefile\n");
+			exit(1);
+		}
+	}
     
 	int c;
 	int idx;

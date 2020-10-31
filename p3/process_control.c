@@ -1,11 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
 
 #include "process_control.h"
 
@@ -17,6 +14,7 @@ int get_argc(char *cmd) {
 	while ((token = strtok(NULL, " "))) {
 		count++;
 	}
+	free(str);
 	return count;
 }
 
@@ -35,8 +33,18 @@ void create_process(SpecNode *spec_node) {
 				*ws = ' ';
 			}
 			int argc = get_argc(cmd);
-			char *argv[argc + 1];
-			argv[argc] = NULL;
+			//~ printf("argc: %d\n", argc);
+			int size = 0;
+			if (argc > 0) {
+				size = argc + 1;
+			} else {
+				size = 2;
+			}
+			char *argv[size];
+			if (argc == 0) {
+				argv[0] = "";
+			}
+			argv[size - 1] = NULL;
 			
 			char *file = strtok(cmd, " ");
 			char *token;
@@ -45,6 +53,11 @@ void create_process(SpecNode *spec_node) {
 				argv[i] = malloc(sizeof(char) * strlen(token));
 				sprintf(argv[i], "%s", token);
 			}
+			//~ printf("argv: ");
+			//~ for (int i = 0; i < argc; i++) {
+				//~ printf("%s ", argv[i]);
+			//~ }
+			//~ printf("\n");
 			if (execvp(file, argv)) {
 				fprintf(stderr, "Error: execvp failed\n");
 				exit(-1);
@@ -54,6 +67,7 @@ void create_process(SpecNode *spec_node) {
 			exit(1);
 		} else {
 			waitpid(pid, &stat_loc, 0);
+			// TODO: check stat_loc
 		}
 		current = current->next;
 	}
