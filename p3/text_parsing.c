@@ -40,9 +40,13 @@ int is_cmd (char *line) {
 void update_graph(SpecGraph* spec_graph, SpecNode *spec_node,
 	int line_num_target, char *line_target) {
 	if (spec_node) {
-		int has_cycle = add_spec_node(spec_graph, spec_node);
-		if (has_cycle){
+		int result = add_spec_node(spec_graph, spec_node);
+		if (result == 1){
 			fprintf(stderr, "%d: cycle in the dependency chain: %s\n",
+				line_num_target, line_target);
+			exit(1);
+		} else if (result == 2) {
+			fprintf(stderr, "%d: duplicate target: %s\n",
 				line_num_target, line_target);
 			exit(1);
 		}

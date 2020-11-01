@@ -19,7 +19,6 @@ SpecNode *create_spec_node(char *target) {
 }
 
 void add_dependency(SpecNode *spec_node, char *dependency) {
-	// TODO: check if dependency is a target or a file that exists
 	Node *node = create_node(dependency);
 	if (spec_node->dependencies) {
 		spec_node->dependencies_tail->next = node;

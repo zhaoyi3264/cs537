@@ -1,7 +1,6 @@
 #ifndef SPEC_REPR_H
 #define SPEC_REPR_H
 
-// TODO: record line_num
 typedef struct Node {
 	char *data;
 	struct Node *next;

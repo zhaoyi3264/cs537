@@ -22,7 +22,6 @@ void create_process(SpecNode *spec_node) {
 	Node *current = spec_node->commands;
 	while (current) {
 		pid_t pid;
-		int stat_loc;
 		pid = fork();
 
 		if (pid == 0) {
@@ -41,9 +40,7 @@ void create_process(SpecNode *spec_node) {
 				size = 2;
 			}
 			char *argv[size];
-			if (argc == 0) {
-				argv[0] = "";
-			}
+			argv[0] = "";
 			argv[size - 1] = NULL;
 			
 			char *file = strtok(cmd, " ");
@@ -59,15 +56,19 @@ void create_process(SpecNode *spec_node) {
 			//~ }
 			//~ printf("\n");
 			if (execvp(file, argv)) {
-				fprintf(stderr, "Error: execvp failed\n");
-				exit(-1);
+				fprintf(stderr, "error: cannot execute command %s\n",
+					current->data);
+				exit(1);
 			}
 		} else if (pid < 0) {
-			fprintf(stderr, ": Fork failed\n");
+			fprintf(stderr, "error: cannot fork child process\n");
 			exit(1);
 		} else {
+			int stat_loc;
 			waitpid(pid, &stat_loc, 0);
-			// TODO: check stat_loc
+			if (stat_loc) {
+				exit(1);
+			}
 		}
 		current = current->next;
 	}

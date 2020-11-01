@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -21,14 +22,11 @@ void fork_test() {
 	}
 }
 
-int is_outdated(struct stat *target, struct stat *dependency) {
-	
-}
-
 int main() {
 	struct stat *statbuf = malloc(sizeof(struct stat));
-	stat("test", statbuf);
-	printf("%ld\n", statbuf->st_dev);
+	int fd = open("test", O_RDONLY);
+	printf("%d\n", fd);
+	fstat(fd, statbuf);
 	struct timespec *st_mtim = &(statbuf->st_mtim);
 	printf("%ld\n", st_mtim->tv_sec);
 }
