@@ -19,6 +19,6 @@ parseopts.o: parseopts.c parseopts.h
 output.o: output.c
 	gcc -c -Wall -Wextra output.c
 scan: something
-	echo something
+	echo
 clean: 
 	rm *.o

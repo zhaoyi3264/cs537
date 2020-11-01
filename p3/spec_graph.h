@@ -13,6 +13,8 @@ int check_cycle(SpecGraph *spec_graph);
 
 int add_spec_node(SpecGraph *spec_graph, SpecNode *spec_node);
 
+SpecNode *find_spec_node(SpecGraph *spec_graph, char *name);
+
 void print_spec_graph(SpecGraph *spec_graph);
 
 #endif

@@ -69,6 +69,17 @@ int add_spec_node(SpecGraph *spec_graph, SpecNode *spec_node) {
 	return check_cycle(spec_graph);
 }
 
+SpecNode *find_spec_node(SpecGraph *spec_graph, char *name) {
+	SpecNode *current = spec_graph->head;
+	while (current) {
+		if (strcmp(name, current->target) == 0) {
+			return current;
+		}
+		current = current->next;
+	}
+	return NULL;
+}
+
 void print_spec_graph(SpecGraph *spec_graph) {
 	printf("***graph***\n");
 	SpecNode *cur_spec_node = spec_graph->head;
