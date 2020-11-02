@@ -15,7 +15,7 @@ int exist(SpecNode *v[], int size, char *dependency) {
 
 int check_cycle_util(SpecNode *v[], int size, int idx, int *visited,
 	int *rec_stack) {
-	if (rec_stack[idx] == 1) {
+	if (rec_stack[idx]) {
 		return 1;
 	}
 	if (visited[idx]) {
