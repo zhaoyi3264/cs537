@@ -90,14 +90,16 @@ int run_rule(SpecGraph *spec_graph, char *name) {
 
 int main(int argc, char **argv) {
 	int opt;
-	char *fname =NULL;
+	char *fname = malloc(4096);
+	int f = 0;
 	int num_targets = 0;
 	char *target;
 	while ((opt = getopt(argc, argv, "-f:")) != -1) {
 		switch (opt) {
 			case 'f':
-				fname = malloc(sizeof(char) * strlen(optarg));
+				//~ fname = malloc(sizeof(char) * strlen(optarg));
 				sprintf(fname, "%s", optarg);
+				f = 1;
 				break;
 			case 1:
 				if (num_targets) {
@@ -112,7 +114,13 @@ int main(int argc, char **argv) {
 				exit(1);
 		}
 	}
-	SpecGraph *spec_graph = parse_makefile(fname);
+	//~ SpecGraph *spec_graph = parse_makefile(fname);
+	SpecGraph *spec_graph = NULL;
+	if (f) {
+		spec_graph = parse_makefile(fname);
+	} else {
+		spec_graph = parse_makefile(NULL);
+	}
 	printf("parsed\n");
 	print_spec_graph(spec_graph);
 	if (num_targets) {
