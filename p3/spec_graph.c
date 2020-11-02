@@ -6,7 +6,7 @@
 
 int exist(SpecNode *v[], int size, char *dependency) {
 	for (int i = 0; i < size; i++) {
-		if (strcmp(v[i]->target, dependency) == 0) {
+		if (strcmp((v[i])->target, dependency) == 0) {
 			return i;
 		}
 	}
@@ -15,7 +15,7 @@ int exist(SpecNode *v[], int size, char *dependency) {
 
 int check_cycle_util(SpecNode *v[], int size, int idx, int *visited,
 	int *rec_stack) {
-	if (rec_stack[idx]) {
+	if (rec_stack[idx] == 1) {
 		return 1;
 	}
 	if (visited[idx]) {

@@ -151,6 +151,9 @@ SpecGraph *parse_makefile (char *fname) {
 	} while (c != EOF);
 	update_graph(spec_graph, spec_node, line_num_target, line_target, line);
 	free(line_target);
+	if (line) {
+		free(line);
+	}
 	fclose(fp);
 	return spec_graph;
 }

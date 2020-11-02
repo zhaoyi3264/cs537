@@ -43,6 +43,7 @@
 *.pdb
 *.txt
 !partner.txt
+p3/proj3/
 
 # Kernel Module Compile Results
 *.mod*
