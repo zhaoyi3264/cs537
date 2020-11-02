@@ -54,6 +54,8 @@ int check_cycle(SpecGraph *spec_graph) {
 			return 1;
 		}
 	}
+	free(visited);
+	free(rec_stack);
 	return 0;
 }
 

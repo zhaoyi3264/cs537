@@ -148,7 +148,7 @@ SpecGraph *parse_makefile (char *fname) {
 		free(line);
 	} while (c != EOF);
 	update_graph(spec_graph, spec_node, line_num_target, line_target);
-	fclose(fp);
 	free(line_target);
+	fclose(fp);
 	return spec_graph;
 }

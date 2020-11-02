@@ -11,9 +11,9 @@
 int get_argc(char *cmd) {
 	char *str = malloc(sizeof(char) * strlen(cmd));
 	sprintf(str, "%s", cmd);
-	char *token = strtok(str, " ");
+	strtok(str, " ");
 	int count = 1;
-	while ((token = strtok(NULL, " "))) {
+	while (strtok(NULL, " ")) {
 		count++;
 	}
 	free(str);
@@ -92,6 +92,7 @@ void execute_command(char *cmd) {
 			command);
 		exit(1);
 	}
+	exit(1);
 }
 
 void create_process(SpecNode *spec_node) {
