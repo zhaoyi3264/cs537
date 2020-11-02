@@ -91,6 +91,7 @@ SpecGraph *parse_makefile (char *fname) {
 			c = fgetc(fp);
 			if (c == '\0') {
 				fprintf(stderr, "%d: null byte found: %s\n", line_num, line);
+				exit(1);
 			}
 			line[idx++] = (char) c;
 		} while (c != '\n' && c != EOF && idx < max_size);

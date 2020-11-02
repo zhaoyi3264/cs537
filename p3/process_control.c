@@ -10,7 +10,7 @@ int get_argc(char *cmd) {
 	char *str = malloc(sizeof(char) * strlen(cmd));
 	sprintf(str, "%s", cmd);
 	char *token = strtok(str, " ");
-	int count = 0;
+	int count = 1;
 	while ((token = strtok(NULL, " "))) {
 		count++;
 	}
@@ -37,25 +37,25 @@ void create_process(SpecNode *spec_node) {
 			if (argc > 0) {
 				size = argc + 1;
 			} else {
-				size = 2;
+				size = 3;
 			}
 			char *argv[size];
-			argv[0] = "";
 			argv[size - 1] = NULL;
 			
-			char *file = strtok(cmd, " ");
-			char *token;
-			for (int i = 0; i < argc; i++) {
+			char *token = strtok(cmd, " ");
+			argv[0] = malloc(sizeof(char) * strlen(token));
+			sprintf(argv[0], "%s", token);
+			for (int i = 1; i < argc; i++) {
 				token = strtok(NULL, " ");
 				argv[i] = malloc(sizeof(char) * strlen(token));
 				sprintf(argv[i], "%s", token);
 			}
-			//~ printf("argv: ");
+			//~ printf("file: %s, argv: ", argv[0]);
 			//~ for (int i = 0; i < argc; i++) {
 				//~ printf("%s ", argv[i]);
 			//~ }
 			//~ printf("\n");
-			if (execvp(file, argv)) {
+			if (execvp(argv[0], argv)) {
 				fprintf(stderr, "error: cannot execute command %s\n",
 					current->data);
 				exit(1);

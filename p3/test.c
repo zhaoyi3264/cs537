@@ -11,9 +11,11 @@ void fork_test() {
 	pid_t pid = fork();
 	if (pid == 0) {
 		printf("child\n");
-		char *argv[] = {"-l", "test", NULL};
-		execvp("wc", argv);
-		//~ exit(1);
+		char *file = "sleep";
+		char *argv[] = {file, "10", NULL};
+		if (execvp(file, argv)) {
+			exit(1);
+		}
 	} else if (pid == -1) {
 		printf("error\n");
 	} else {
@@ -24,9 +26,7 @@ void fork_test() {
 
 int main() {
 	struct stat *statbuf = malloc(sizeof(struct stat));
-	int fd = open("test", O_RDONLY);
-	printf("%d\n", fd);
+	int fd = open("queue.o", O_RDONLY);
 	fstat(fd, statbuf);
-	struct timespec *st_mtim = &(statbuf->st_mtim);
-	printf("%ld\n", st_mtim->tv_sec);
+	printf("%ld\n", (&(statbuf->st_mtim))->tv_sec);
 }

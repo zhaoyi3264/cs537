@@ -1,0 +1,15 @@
+a: b
+	echo a a a
+b: d
+	echo b b b
+c: a
+	echo c c c
+d: in
+	echo d d d
+in: makefile
+	echo in in in
+e: in
+	echo e e e
+f: 
+	echo f f f
+	sleep 2
