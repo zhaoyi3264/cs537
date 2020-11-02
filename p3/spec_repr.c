@@ -6,14 +6,14 @@
 
 Node *create_node(char *data) {
 	Node *node = malloc(sizeof(Node));
-	node->data = malloc(sizeof(char) * strlen(data));
+	node->data = malloc(sizeof(char) * strlen(data) + 1);
 	sprintf(node->data, "%s", data);
 	return node;
 }
 
 SpecNode *create_spec_node(char *target) {
 	SpecNode *spec_node = malloc(sizeof(SpecNode));
- 	spec_node->target = malloc(sizeof(char) * strlen(target));
+ 	spec_node->target = malloc(sizeof(char) * strlen(target) + 1);
 	sprintf(spec_node->target, "%s", target);
 	return spec_node;
 }

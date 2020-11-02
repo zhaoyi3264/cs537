@@ -8,7 +8,7 @@
 
 int is_blank(char *line) {
 	for (int i = 0; line[i]; i++) {
-		if (isspace(line[i]) != 0) {
+		if (isspace(line[i]) == 0) {
 			return 0;
 		}
 	}
@@ -58,6 +58,10 @@ SpecGraph *parse_makefile (char *fname) {
 	FILE *fp;
 	if (fname) {
 		 fp = fopen(fname, "r");
+		 if (fp == NULL) {
+			 fprintf(stderr, "error: makefile %s not found\n", fname);
+			 exit(1);
+		 }
 	} else {
 		char *file[] = {"makefile", "Makefile"};
 		for (int i = 0; i < 2; i++) {
@@ -96,6 +100,7 @@ SpecGraph *parse_makefile (char *fname) {
 			line[idx++] = (char) c;
 		} while (c != '\n' && c != EOF && idx < max_size);
 		line_num++;
+		
 		if (idx >= max_size) {
 			fprintf(stderr, "%d: line length exceeds the buffer size: %s\n",
 				line_num, line);
@@ -107,13 +112,11 @@ SpecGraph *parse_makefile (char *fname) {
 		char *dep_string = NULL;
 		char *token = NULL;
 		char *ws = NULL;
-		// a comment line
-		if (line[0] == '#') {
-			//~ printf("comment: %s\n", line);
+		// a comment or blank line
+		if (line[0] == '#' || is_blank(line)) {
 			continue;
 		// a target line
 		} else if (is_target(line)) {
-			//~ printf("target: %s\n", line);
 			update_graph(spec_graph, spec_node, line_num_target, line_target);
 			sprintf(line_target, "%s", line);
 			line_num_target = line_num;
@@ -136,12 +139,7 @@ SpecGraph *parse_makefile (char *fname) {
 			}
 		// a command line
 		} else if (is_cmd(line)) {
-			//~ printf("command: %s\n", line);
 			add_command(spec_node, line + 1);
-		// blank
-		} else if (is_blank(line)) {
-			//~ printf("blank: %s\n", line);
-			continue;
 		// error
 		} else {
 			fprintf(stderr, "%d: invalid line: %s\n", line_num, line);

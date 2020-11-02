@@ -1,21 +1,10 @@
 CC = gcc
 WARNING_FLAGS = -Wall -Wextra -pedantic
 EXE = 537make
+SCAN_BUILD_DIR = scan-build-out
 
 all: main.o process_control.o text_parsing.o spec_repr.o spec_graph.o
 	$(CC) -o $(EXE) main.o process_control.o text_parsing.o spec_repr.o spec_graph.o
-	cp 537make proj3/advanced_cycle_testcase
-	cp 537make proj3/basic_cycle_testcase
-	cp 537make proj3/basic_testcase
-	cp 537make proj3/linesize_testcase
-	cp 537make proj3/missing_colon
-	cp 537make proj3/missing_tab
-	cp 537make proj3/modification_check
-	cp 537make proj3/null_character
-	cp 537make proj3/separate_graph_cycles
-	cp 537make proj3/shuffled_cycle_testcase
-	cp 537make proj3/simple_testcase
-	cp 537make proj3/whitespace_testcase
 
 main.o: main.c text_parsing.h
 	$(CC) $(WARNING_FLAGS) -c main.c
@@ -34,7 +23,14 @@ spec_repr.o: spec_repr.c spec_repr.h
 	
 test: test.c
 	$(CC) $(WARNING_FLAGS) test.c -o out
-	./out
+#~ 	./out
+#~ 	rm -f out
 
 clean:
 	rm $(EXE) *.o
+
+scan-build: clean
+	scan-build -o $(SCAN_BUILD_DIR) make
+
+scan-view: scan-build
+	firefox -new-window $(SCAN_BUILD_DIR)/*/index.html

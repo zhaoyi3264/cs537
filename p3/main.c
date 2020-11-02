@@ -10,7 +10,6 @@
 
 void get_modify_time(char *name, struct stat *statbuf) {
 	int fd = open(name, O_RDONLY);
-	//~ printf("fd of %s: %d\n", name, fd);
 	fstat(fd, statbuf);
 	if (fd == -1) {
 		struct timespec *ts = &(statbuf->st_mtim);
@@ -29,35 +28,33 @@ int dependency_is_newer(char *target, char *dependency) {
 	
 	long tar;
 	long dep;
-	if (target_time->tv_sec && target_time->tv_sec == dependency_time->tv_sec) {
+	if ((target_time->tv_sec || dependency_time->tv_sec) &&
+		target_time->tv_sec == dependency_time->tv_sec) {
 		tar = target_time->tv_nsec;
 		dep = dependency_time->tv_nsec;
-		//~ printf("ns %s: %ld, %s: %ld\n", target, tar, dependency, dep);
+		//~ printf("ns: %s: %ld, %s: %ld\n", target, tar, dependency, dep);
 	} else {
 		tar = target_time->tv_sec;
 		dep = dependency_time->tv_sec;
-		//~ printf("s  %s: %ld, %s: %ld\n", target, tar, dependency, dep);
+		//~ printf("s : %s: %ld, %s: %ld\n", target, tar, dependency, dep);
 	}
 	free(target_stat);
 	free(dependency_stat);
-	return dep >= tar;
+	return dep > tar;
 }
 
 int is_outdated(SpecGraph *spec_graph, char *name) {
-	//~ printf("checking %s\n", name);
 	SpecNode *spec_node = find_spec_node(spec_graph, name);
 	if (spec_node == NULL) {
-		//~ printf("%s not found\n", name);
 		return 0;
 	}
 	Node *current = spec_node->dependencies;
 	// iterate through depdencies
 	while (current) {
-		// if file, check modify time
-		if (dependency_is_newer(name, current->data)) {
-			return 1;
-		}
-		if (is_outdated(spec_graph, current->data)) {
+		if (dependency_is_newer(name, current->data) ||
+			is_outdated(spec_graph, current->data)) {
+				//~ printf("{%s} dep {%s} is out of date\n", name, current->data);
+				//~ printf("%d\n", dependency_is_newer(name, current->data));
 			return 1;
 		}
 		current = current->next;
@@ -65,28 +62,31 @@ int is_outdated(SpecGraph *spec_graph, char *name) {
 	return spec_node->dependencies == NULL;
 }
 
-void run_rule(SpecGraph *spec_graph, char *name) {
+int run_rule(SpecGraph *spec_graph, char *name) {
 	// check if the name is a target
 	SpecNode *spec_node = find_spec_node(spec_graph, name);
 	// name is a file
 	// TODO: check if file exist
 	if (spec_node == NULL) {
-		return;
+		return 0;
 	}
 	Node *current = spec_node->dependencies;
+	int result = 0;
 	// iterate through depdencies
 	while (current) {
-		run_rule(spec_graph, current->data);
+		if (run_rule(spec_graph, current->data)) {
+			result = 1;
+		}
 		current = current->next;
 	}
 	int outdated = is_outdated(spec_graph, name);
 	//~ printf("%s is outdated: %d\n", name, outdated);
 	if (outdated) {
 		create_process(spec_node);
+		result = 1;
 	}
+	return result;
 }
-
-// extra credit
 
 int main(int argc, char **argv) {
 	int opt;
@@ -109,18 +109,24 @@ int main(int argc, char **argv) {
 				num_targets++;
 				break;
 			default:
-				// TODO: report error
-				break;
+				exit(1);
 		}
 	}
 	SpecGraph *spec_graph = parse_makefile(fname);
-	print_spec_graph(spec_graph);
+	//~ print_spec_graph(spec_graph);
 	if (num_targets) {
-		printf("target: %s\n", target);
-		run_rule(spec_graph, target);
+		if (find_spec_node(spec_graph, target)) {
+			if (run_rule(spec_graph, target) == 0) {
+				printf("%s is up to date\n", target);
+			}
+		} else {
+			fprintf(stderr, "error: cannot find target %s\n", target);
+		}
 		free(target);
 	} else {
-		run_rule(spec_graph, spec_graph->head->target);
+		if (run_rule(spec_graph, spec_graph->head->target) == 0) {
+			printf("%s is up to date\n", spec_graph->head->target);
+		}
 	}
 	if (fname) {
 		free(fname);
