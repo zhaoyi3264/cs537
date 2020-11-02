@@ -6,7 +6,7 @@
 
 int exist(SpecNode **v, int size, char *dependency) {
 	for (int i = 0; i < size; i++) {
-		if (strcmp(v[i]->target, dependency) == 0) {
+		if (v[i] && strcmp(v[i]->target, dependency) == 0) {
 			return i;
 		}
 	}
@@ -53,6 +53,7 @@ int check_cycle(SpecGraph *spec_graph) {
 		if (check_cycle_util(v, size, i, visited, rec_stack)) {
 			free(visited);
 			free(rec_stack);
+			free(v);
 			return 1;
 		}
 	}
