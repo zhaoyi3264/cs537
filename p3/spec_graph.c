@@ -51,6 +51,8 @@ int check_cycle(SpecGraph *spec_graph) {
 	}
 	for (int i = 0; i < size; i++) {
 		if (check_cycle_util(v, size, i, visited, rec_stack)) {
+			free(visited);
+			free(rec_stack);
 			return 1;
 		}
 	}

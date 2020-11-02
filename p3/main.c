@@ -102,6 +102,9 @@ int main(int argc, char **argv) {
 			case 1:
 				if (num_targets) {
 					fprintf(stderr, "error: multiple targets specified\n");
+					if (fname) {
+						free(fname);
+					}
 					exit(1);
 				}
 				target = malloc(sizeof(char) * strlen(optarg));
@@ -109,6 +112,9 @@ int main(int argc, char **argv) {
 				num_targets++;
 				break;
 			default:
+				if (fname) {
+					free(fname);
+				}
 				exit(1);
 		}
 	}

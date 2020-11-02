@@ -38,16 +38,18 @@ int is_cmd (char *line) {
 }
 
 void update_graph(SpecGraph* spec_graph, SpecNode *spec_node,
-	int line_num_target, char *line_target) {
+	int line_num_target, char *line_target, char *line) {
 	if (spec_node) {
 		int result = add_spec_node(spec_graph, spec_node);
 		if (result == 1){
 			fprintf(stderr, "%d: cycle in the dependency chain: %s\n",
 				line_num_target, line_target);
+			free(line);
 			exit(1);
 		} else if (result == 2) {
 			fprintf(stderr, "%d: duplicate target: %s\n",
 				line_num_target, line_target);
+			free(line);
 			exit(1);
 		}
 	}
@@ -117,7 +119,8 @@ SpecGraph *parse_makefile (char *fname) {
 			continue;
 		// a target line
 		} else if (is_target(line)) {
-			update_graph(spec_graph, spec_node, line_num_target, line_target);
+			update_graph(spec_graph, spec_node, line_num_target, line_target,
+				line);
 			sprintf(line_target, "%s", line);
 			line_num_target = line_num;
 			// replace tabs with spaces
@@ -143,11 +146,10 @@ SpecGraph *parse_makefile (char *fname) {
 		// error
 		} else {
 			fprintf(stderr, "%d: invalid line: %s\n", line_num, line);
-			exit(1);
 		}
 		free(line);
 	} while (c != EOF);
-	update_graph(spec_graph, spec_node, line_num_target, line_target);
+	update_graph(spec_graph, spec_node, line_num_target, line_target, line);
 	free(line_target);
 	fclose(fp);
 	return spec_graph;
