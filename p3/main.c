@@ -90,7 +90,7 @@ int run_rule(SpecGraph *spec_graph, char *name) {
 
 int main(int argc, char **argv) {
 	int opt;
-	char *fname = NULL;
+	char *fname =NULL;
 	int num_targets = 0;
 	char *target;
 	while ((opt = getopt(argc, argv, "-f:")) != -1) {
@@ -102,9 +102,6 @@ int main(int argc, char **argv) {
 			case 1:
 				if (num_targets) {
 					fprintf(stderr, "error: multiple targets specified\n");
-					if (fname) {
-						free(fname);
-					}
 					exit(1);
 				}
 				target = malloc(sizeof(char) * strlen(optarg));
@@ -112,14 +109,12 @@ int main(int argc, char **argv) {
 				num_targets++;
 				break;
 			default:
-				if (fname) {
-					free(fname);
-				}
 				exit(1);
 		}
 	}
 	SpecGraph *spec_graph = parse_makefile(fname);
-	//~ print_spec_graph(spec_graph);
+	printf("parsed\n");
+	print_spec_graph(spec_graph);
 	if (num_targets) {
 		if (find_spec_node(spec_graph, target)) {
 			if (run_rule(spec_graph, target) == 0) {

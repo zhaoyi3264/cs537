@@ -4,16 +4,16 @@
 
 #include "spec_graph.h"
 
-int exist(SpecNode **v, int size, char *dependency) {
+int exist(SpecNode *v[], int size, char *dependency) {
 	for (int i = 0; i < size; i++) {
-		if (v[i] && strcmp(v[i]->target, dependency) == 0) {
+		if (strcmp(v[i]->target, dependency) == 0) {
 			return i;
 		}
 	}
 	return -1;
 }
 
-int check_cycle_util(SpecNode **v, int size, int idx, int *visited,
+int check_cycle_util(SpecNode *v[], int size, int idx, int *visited,
 	int *rec_stack) {
 	if (rec_stack[idx]) {
 		return 1;
@@ -41,7 +41,7 @@ int check_cycle_util(SpecNode **v, int size, int idx, int *visited,
 int check_cycle(SpecGraph *spec_graph) {
 	int size = spec_graph->size;
 	SpecNode *current = spec_graph->head;
-	SpecNode **v = malloc(sizeof(SpecNode *) * size);
+	SpecNode *v[size];
 	int *visited = malloc(sizeof(int) * size);
 	int *rec_stack = malloc(sizeof(int) * size);
 	for (int i = 0; current; current = current->next, i++) {
@@ -51,15 +51,13 @@ int check_cycle(SpecGraph *spec_graph) {
 	}
 	for (int i = 0; i < size; i++) {
 		if (check_cycle_util(v, size, i, visited, rec_stack)) {
-			free(visited);
 			free(rec_stack);
-			free(v);
+			free(visited);
 			return 1;
 		}
 	}
-	free(visited);
 	free(rec_stack);
-	free(v);
+	free(visited);
 	return 0;
 }
 
