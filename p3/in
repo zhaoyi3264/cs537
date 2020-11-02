@@ -19,7 +19,7 @@ f:
 
 g:
   
-re_in:
+re:
 	echo something
 	cat<makefile>else
 	echo else

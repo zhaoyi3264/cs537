@@ -49,16 +49,14 @@ int check_cycle(SpecGraph *spec_graph) {
 		visited[i] = 0;
 		rec_stack[i] = 0;
 	}
+	int result = 0;
 	for (int i = 0; i < size; i++) {
 		if (check_cycle_util(v, size, i, visited, rec_stack)) {
-			free(rec_stack);
-			free(visited);
-			return 1;
+			result = 1;
+			break;
 		}
 	}
-	free(rec_stack);
-	free(visited);
-	return 0;
+	return result;
 }
 
 int add_spec_node(SpecGraph *spec_graph, SpecNode *spec_node) {

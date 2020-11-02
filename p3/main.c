@@ -90,16 +90,14 @@ int run_rule(SpecGraph *spec_graph, char *name) {
 
 int main(int argc, char **argv) {
 	int opt;
-	char *fname = malloc(4096);
-	int f = 0;
+	char *fname = NULL;
 	int num_targets = 0;
 	char *target;
 	while ((opt = getopt(argc, argv, "-f:")) != -1) {
 		switch (opt) {
 			case 'f':
-				//~ fname = malloc(sizeof(char) * strlen(optarg));
+				fname = malloc(sizeof(char) * strlen(optarg));
 				sprintf(fname, "%s", optarg);
-				f = 1;
 				break;
 			case 1:
 				if (num_targets) {
@@ -114,15 +112,11 @@ int main(int argc, char **argv) {
 				exit(1);
 		}
 	}
-	//~ SpecGraph *spec_graph = parse_makefile(fname);
-	SpecGraph *spec_graph = NULL;
-	if (f) {
-		spec_graph = parse_makefile(fname);
-	} else {
-		spec_graph = parse_makefile(NULL);
+	SpecGraph *spec_graph = parse_makefile(fname);
+	//~ print_spec_graph(spec_graph);
+	if (fname) {
+		free(fname);
 	}
-	printf("parsed\n");
-	print_spec_graph(spec_graph);
 	if (num_targets) {
 		if (find_spec_node(spec_graph, target)) {
 			if (run_rule(spec_graph, target) == 0) {
@@ -136,8 +130,5 @@ int main(int argc, char **argv) {
 		if (run_rule(spec_graph, spec_graph->head->target) == 0) {
 			printf("%s is up to date\n", spec_graph->head->target);
 		}
-	}
-	if (fname) {
-		free(fname);
 	}
 }
