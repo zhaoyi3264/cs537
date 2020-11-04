@@ -173,6 +173,7 @@ int main(int argc, char **argv) {
 			}
 		} else {
 			fprintf(stderr, "error: cannot find target %s\n", target);
+			exit(1);
 		}
 		free(target);
 	} else {
