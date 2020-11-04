@@ -1,3 +1,11 @@
+/*
+ * Process control module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
 #include <ctype.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -8,9 +16,18 @@
 
 #include "process_control.h"
 
+/*
+ * Get number of arguments of a command
+ * 
+ * cmd: command
+ * 
+ * return: number of arguments
+ */
 int get_argc(char *cmd) {
 	char *str = malloc(sizeof(char) * strlen(cmd));
-	sprintf(str, "%s", cmd);
+	if (str == NULL || (sprintf(str, "%s", cmd) < 0)) {
+		exit(1);
+	}
 	strtok(str, " ");
 	int count = 1;
 	while (strtok(NULL, " ")) {
@@ -20,11 +37,21 @@ int get_argc(char *cmd) {
 	return count;
 }
 
+/*
+ * Remove spaces in the string
+ * 
+ * str: string
+ * 
+ * return: the string without spaces
+ */
 char *remove_space(char *str) {
 	if (str == NULL) {
 		return NULL;
 	}
 	char *temp = malloc(sizeof(char) * strlen(str));
+	if (temp == NULL) {
+		exit(1);
+	}
 	int j = 0;
 	for (int i = 0; str[i]; i++) {
 		if (isspace(str[i]) == 0) {
@@ -35,6 +62,11 @@ char *remove_space(char *str) {
 	return temp;
 }
 
+/*
+ * Execute a command and handle I/O redirection
+ * 
+ * cmd: command
+ */
 void execute_command(char *cmd) {
 	// replace tabs with spaces
 	char *ws = NULL;
@@ -57,16 +89,23 @@ void execute_command(char *cmd) {
 	int new_in = 0;
 	int new_out = 0;
 	if (in) {
-		new_in = open(in, O_RDONLY);
+		if ((new_in = open(in, O_RDONLY)) == -1) {
+			exit(1);
+		}
 		dup2(new_in, STDIN_FILENO);
-		close(new_in);
-		free(in);
+		if (close(new_in) == -1) {
+			exit(1);
+		}
 	}
 	if (out) {
-		new_out = open(out, O_CREAT|O_WRONLY|O_TRUNC, S_IRUSR|S_IWUSR);
+		if ((new_out = open(out, O_CREAT|O_WRONLY|O_TRUNC,
+			S_IRUSR|S_IWUSR)) == -1) {
+			exit(1);
+		}
 		dup2(new_out, STDOUT_FILENO);
-		close(new_out);
-		free(out);
+		if (close(new_out) == -1) {
+			exit(1);
+		}
 	}
 	// split command line
 	int argc = get_argc(command);
@@ -81,11 +120,15 @@ void execute_command(char *cmd) {
 	
 	char *token = strtok(command, " ");
 	argv[0] = malloc(sizeof(char) * strlen(token));
-	sprintf(argv[0], "%s", token);
+	if (argv[0] == NULL || (sprintf(argv[0], "%s", token) < 0)) {
+		exit(1);
+	}
 	for (int i = 1; i < argc; i++) {
 		token = strtok(NULL, " ");
 		argv[i] = malloc(sizeof(char) * strlen(token));
-		sprintf(argv[i], "%s", token);
+		if (argv[i] == NULL || (sprintf(argv[i], "%s", token) < 0)) {
+			exit(1);
+		}
 	}
 	if (execvp(argv[0], argv)) {
 		fprintf(stderr, "error: cannot execute command %s\n",
@@ -95,22 +138,22 @@ void execute_command(char *cmd) {
 	exit(1);
 }
 
-void create_process(SpecNode *spec_node) {
-	Node *current = spec_node->commands;
-	while (current) {
-		pid_t pid = fork();
-		if (pid == 0) {
-			execute_command(current->data);
-		} else if (pid < 0) {
-			fprintf(stderr, "error: cannot fork child process\n");
+/*
+ * Create a process to execute commands in the specification node
+ * 
+ * cmd: command to start the process
+ */
+void create_process(char *cmd) {
+	pid_t pid = fork();
+	if (pid == 0) {
+		execute_command(cmd);
+	} else if (pid < 0) {
+		fprintf(stderr, "error: cannot fork child process\n");
+		exit(1);
+	} else {
+		int stat_loc;
+		if ((waitpid(pid, &stat_loc, 0) == -1) || stat_loc) {
 			exit(1);
-		} else {
-			int stat_loc;
-			waitpid(pid, &stat_loc, 0);
-			if (stat_loc) {
-				exit(1);
-			}
 		}
-		current = current->next;
 	}
 }

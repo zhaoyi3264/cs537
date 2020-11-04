@@ -1,7 +1,6 @@
 a: b
 	echo a a a
-	
-   
+	echo aaa
 b: d
 	echo b b b
 	   

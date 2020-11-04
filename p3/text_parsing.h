@@ -1,3 +1,9 @@
+/*
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
 #ifndef TEXT_PARSING_H
 #define TEXT_PARSING_H
 

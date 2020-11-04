@@ -1,0 +1,6 @@
+This project is implements a simple version of the Linux `make` command. It
+allows using -f option to specify the name of the makefile and the -f option and
+the target name can appear in any order. I/O redirection is also allowed in the
+commands in the makefile. I/O redirection operators (< and >) can appear in any
+order and with or without spaces between the command, input source and output
+destination.

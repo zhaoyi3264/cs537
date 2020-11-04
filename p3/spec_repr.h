@@ -1,3 +1,9 @@
+/*
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
 #ifndef SPEC_REPR_H
 #define SPEC_REPR_H
 
