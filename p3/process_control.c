@@ -146,7 +146,12 @@ void execute_command(char *cmd) {
 void create_process(char *cmd) {
 	pid_t pid = fork();
 	if (pid == 0) {
-		execute_command(cmd);
+		char *copy = malloc(sizeof(char) * strlen(cmd) + 1);
+		if (copy == NULL || (sprintf(copy, "%s", cmd) < 0)) {
+			exit(1);
+		}
+		execute_command(copy);
+		free(copy);
 	} else if (pid < 0) {
 		fprintf(stderr, "error: cannot fork child process\n");
 		exit(1);
