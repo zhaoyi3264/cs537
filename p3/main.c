@@ -181,4 +181,5 @@ int main(int argc, char **argv) {
 			printf("%s is up to date\n", spec_graph->head->target);
 		}
 	}
+	free(spec_graph);
 }

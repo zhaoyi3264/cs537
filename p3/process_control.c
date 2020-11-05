@@ -24,7 +24,7 @@
  * return: number of arguments
  */
 int get_argc(char *cmd) {
-	char *str = malloc(sizeof(char) * strlen(cmd));
+	char *str = malloc(sizeof(char) * strlen(cmd) + 1);
 	if (str == NULL || (sprintf(str, "%s", cmd) < 0)) {
 		exit(1);
 	}
@@ -48,7 +48,7 @@ char *remove_space(char *str) {
 	if (str == NULL) {
 		return NULL;
 	}
-	char *temp = malloc(sizeof(char) * strlen(str));
+	char *temp = malloc(sizeof(char) * strlen(str) + 1);
 	if (temp == NULL) {
 		exit(1);
 	}
@@ -119,13 +119,13 @@ void execute_command(char *cmd) {
 	argv[size - 1] = NULL;
 	
 	char *token = strtok(command, " ");
-	argv[0] = malloc(sizeof(char) * strlen(token));
+	argv[0] = malloc(sizeof(char) * strlen(token) + 1);
 	if (argv[0] == NULL || (sprintf(argv[0], "%s", token) < 0)) {
 		exit(1);
 	}
 	for (int i = 1; i < argc; i++) {
 		token = strtok(NULL, " ");
-		argv[i] = malloc(sizeof(char) * strlen(token));
+		argv[i] = malloc(sizeof(char) * strlen(token) + 1);
 		if (argv[i] == NULL || (sprintf(argv[i], "%s", token) < 0)) {
 			exit(1);
 		}
