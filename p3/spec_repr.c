@@ -31,6 +31,7 @@ Node *create_node(char *data) {
 	if (sprintf(node->data, "%s", data) < 0) {
 		exit(1);
 	}
+	node->next = NULL;
 	return node;
 }
 
@@ -53,6 +54,11 @@ SpecNode *create_spec_node(char *target) {
 	if (sprintf(spec_node->target, "%s", target) < 0) {
 		exit(1);
 	}
+	spec_node->dependencies = NULL;
+	spec_node->dependencies_tail = NULL;
+	spec_node->commands = NULL;
+	spec_node->commands_tail = NULL;
+	spec_node->next = NULL;
 	return spec_node;
 }
 

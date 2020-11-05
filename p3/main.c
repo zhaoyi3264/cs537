@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 	while ((opt = getopt(argc, argv, "-f:")) != -1) {
 		switch (opt) {
 			case 'f':
-				fname = malloc(sizeof(char) * strlen(optarg));
+				fname = malloc(sizeof(char) * strlen(optarg) + 1);
 				if (fname == NULL || (sprintf(fname, "%s", optarg) < 0)) {
 					exit(1);
 				}
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "error: multiple targets specified\n");
 					exit(1);
 				}
-				target = malloc(sizeof(char) * strlen(optarg));
+				target = malloc(sizeof(char) * strlen(optarg) + 1);
 				if (target == NULL || (sprintf(target, "%s", optarg) < 0)) {
 					exit(1);
 				}

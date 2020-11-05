@@ -38,6 +38,8 @@ int exist(SpecNode *v[], int size, char *dependency) {
  * idx: index of the node to check
  * visited: array which indicates if a node has been visited
  * rec_stack: array which indicates if a node is in the recursion stack
+ * 
+ * return: 1 if there is a cycle, 0 otherwise
  */
 int check_cycle_util(SpecNode *v[], int size, int idx, int *visited,
 	int *rec_stack) {
@@ -69,7 +71,7 @@ int check_cycle_util(SpecNode *v[], int size, int idx, int *visited,
  * 
  * spec_graph: specification graph
  * 
- * return: 1 if there is a cycle
+ * return: 1 if there is a cycle, 0 otherwise
  */
 int check_cycle(SpecGraph *spec_graph) {
 	int size = spec_graph->size;
@@ -90,8 +92,8 @@ int check_cycle(SpecGraph *spec_graph) {
 			return 1;
 		}
 	}
-	free(visited);
 	free(rec_stack);
+	free(visited);
 	return 0;
 }
 

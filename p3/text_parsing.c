@@ -125,7 +125,7 @@ SpecGraph *parse_makefile (char *fname) {
 	
 	char * line = NULL;
     int line_num = 0;
-    char *line_target = malloc(sizeof(char) * max_size);
+    char *line_target = malloc(sizeof(char) * max_size + 1);
     if (line_target == NULL) {
 		exit(1);
 	}
