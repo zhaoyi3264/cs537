@@ -60,7 +60,7 @@ int is_cmd (char *line) {
 	if (c == '\0') {
 		return 0;
 	}
-	if (c == '\t' && line[1] != '\t' && !is_blank(line)) {
+	if (c == '\t' && !is_blank(line)) {
 		return 1;
 	}
 	return 0;
@@ -193,7 +193,7 @@ SpecGraph *parse_makefile (char *fname) {
 				}
 			}
 		// a command line
-		} else if (idx > 1 && is_cmd(line)) {
+		} else if (is_cmd(line)) {
 			add_command(spec_node, line + 1);
 		// error
 		} else {
