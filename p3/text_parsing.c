@@ -145,22 +145,20 @@ SpecGraph *parse_makefile (char *fname) {
 			exit(1);
 		}
 		do {
-			c = fgetc(fp);
-			if (c == '\0') {
+			if ((c = fgetc(fp)) == '\0') {
 				fprintf(stderr, "%d: null byte found: %s\n", line_num, line);
 				exit(1);
 			}
 			line[idx++] = (char) c;
-		} while (c != '\n' && c != EOF && idx < max_size);
+			if (idx >= max_size) {
+				fprintf(stderr, "%d: line length exceeds the buffer size: %s\n",
+					line_num, line);
+				exit(1);
+			}
+		} while (c != EOF && c != '\n');
 		line_num++;
 		
-		if (idx >= max_size) {
-			fprintf(stderr, "%d: line length exceeds the buffer size: %s\n",
-				line_num, line);
-			exit(1);
-		} else {
-			line[idx - 1] = '\0';
-		}
+		line[idx - 1] = '\0';
 		
 		char *dep_string = NULL;
 		char *token = NULL;
