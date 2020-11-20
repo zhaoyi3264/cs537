@@ -44,6 +44,7 @@
 *.txt
 !partner.txt
 p3/proj3/
+p4/proj4/
 
 # Kernel Module Compile Results
 *.mod*
