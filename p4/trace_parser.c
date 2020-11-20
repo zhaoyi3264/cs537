@@ -25,7 +25,7 @@ void validate_pid_addr(char *str, char *pid_addr, char *line, int line_num) {
 	}
 }
 
-PTable *parse_trace(char *fname) {
+ProcT *parse_trace(char *fname) {
 	if (fname == NULL) {
 		fprintf(stderr, "error: no trace file specified\n");
 		exit(1);
@@ -37,7 +37,7 @@ PTable *parse_trace(char *fname) {
     ssize_t size;
     int line_num = 0;
     
-    PTable *pt = create_ptable();
+    ProcT *proc_t = create_proc_t();
     
     char *buf = NULL;
     char *pid = NULL;
@@ -53,13 +53,38 @@ PTable *parse_trace(char *fname) {
         addr = strtok(NULL, " ");
         validate_pid_addr(addr, "address", line, line_num);
         //~ printf("%.3d: pid: %s\taddr: %s\n", line_num, pid, addr);
-        update_pte_trace(pt, pid, line_num);
+        update_proc_te_trace(proc_t, pid, line_num);
         addr = strtok(NULL, " ");
         if (addr) {
 			fprintf(stderr, "error: %d: invalid trace %s\n", line_num, line);
 			exit(1);
 		}
+		free(buf);
     }
 	fclose(fp);
-	return pt;
+	return proc_t;
+}
+
+void execute_trace(char *fname) {
+	if (fname == NULL) {
+		fprintf(stderr, "error: no trace file specified\n");
+		exit(1);
+	}
+	
+	FILE *fp = fopen(fname, "r");
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t size;
+    int line_num = 0;
+    
+    char *pid = NULL;
+    char *addr = NULL;
+
+    while ((size = getline(&line, &len, fp)) != -1) {
+		line_num++;
+        line[size - 1] = '\0';
+        pid = strtok(line, " ");
+        addr = strtok(NULL, " ");
+    }
+	fclose(fp);
 }

@@ -66,6 +66,6 @@ int main(int argc, char * argv[]) {
 	printf("page size: %ld\n mem size: %d\n  pf size: %d\ntrace    : %s\n",
 		page_size, mem_size, page_frame_num, trace_file);
 		
-	PTable *pt = parse_trace(trace_file);
-	print_pt(pt);
+	ProcT *proc_t = parse_trace(trace_file);
+	print_proc_t(proc_t);
 }

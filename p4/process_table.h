@@ -1,27 +1,27 @@
 #ifndef PROCESS_TABLE_H
 #define PROCESS_TABLE_H
 
-typedef struct PTEntry {
+typedef struct ProcTE {
 	char *pid;
 	int first_trace;
 	int last_trace;
 	int runnable;
-	struct PTEntry *next;
-} PTEntry;
+	struct ProcTE *next;
+} ProcTE;
 
-typedef struct PTable {
-	PTEntry *head;
-	PTEntry *tail;
-} PTable;
+typedef struct ProcT {
+	ProcTE *head;
+	ProcTE *tail;
+} ProcT;
 
-PTEntry *create_ptentry(char *pid, int trace);
+ProcTE *create_proc_te(char *pid, int trace);
 
-PTable *create_ptable();
+ProcT *create_proc_t();
 
-PTEntry *find_pte(PTable *pt, char *pid);
+ProcTE *find_proc_te(ProcT *proc_t, char *pid);
 
-void update_pte_trace(PTable *pt, char *pid, int trace);
+void update_proc_te_trace(ProcT *proc_t, char *pid, int trace);
 
-void print_pt(PTable *pt);
+void print_proc_t(ProcT *proc_t);
 
 #endif
