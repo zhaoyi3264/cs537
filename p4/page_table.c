@@ -6,59 +6,85 @@
 
 #include "page_table.h"
 
-PageTE *create_page_te(char *pid, char *vpn, int ppn) {
-	PageTE *page_te = malloc(sizeof(PageTE));
-	page_te->pid = malloc(strlen(pid) + 1);
-	sprintf(page_te->pid, "%s", pid);
-	page_te->vpn = malloc(strlen(vpn) + 1);
-	sprintf(page_te->vpn, "%s", vpn);
-	page_te->ppn = ppn;
-	return page_te;
+PTE *create_pte(long pid, long vpn, long ppn) {
+	PTE *pte = malloc(sizeof(PTE));
+	pte->pid = pid;
+	pte->vpn = vpn;
+	pte->ppn = ppn;
+	return pte;
 }
 
-PageT *create_page_t() {
-	PageT *page_t = malloc(sizeof(PageT));
-	return page_t;
+PT *create_pt() {
+	PT *pt = malloc(sizeof(PT));
+	return pt;
 }
 
-int compare_page_te(const void *page_te_1, const void *page_te_2) {
-	PageTE *a = (PageTE *)page_te_1;
-	PageTE *b = (PageTE *)page_te_2;
-	int result = strcmp(a->pid, b->pid);
-	if (result) {
-		return result;
-	} else {
-		return strcmp(a->vpn, b->vpn);
+int compare_pte(const void *a, const void *b) {
+	PTE *pte_1 = (PTE *)a;
+	PTE *pte_2 = (PTE *)b;
+	long result = pte_1->pid - pte_2->pid;
+	if (result == 0) {
+		result = pte_1->vpn - pte_2->vpn;
 	}
+	return result;
 }
 
-PageTE *add_page_te(PageT *page_t, char *pid, char *vpn, int ppn) {
-	PageTE *page_te = create_page_te(pid, vpn, ppn);
-	return tsearch((void *)page_te, &(page_t->root), &compare_page_te);
+int compare_pte_pid(const void *a, const void *b) {
+	PTE *pte_1 = (PTE *)a;
+	PTE *pte_2 = (PTE *)b;
+	return pte_1->pid - pte_2->pid;
 }
 
-PageTE *delete_page_te(PageT *page_t, char *pid, char *vpn) {
-	PageTE *page_te = create_page_te(pid, vpn, 0);
-	return tdelete((void *)page_te, &(page_t->root), &compare_page_te);
+void add_pte(PT *pt, long pid, long vpn, long ppn) {
+	PTE *pte = create_pte(pid, vpn, ppn);
+	tsearch((void *)pte, &(pt->root), &compare_pte);
 }
 
-void clear_page_t(PageT *page_t) {
-	tdestroy(page_t->root, &free);
-	page_t->root = NULL;
+void delete_pte(PT *pt, long pid, long vpn) {
+	PTE *key = create_pte(pid, vpn, 0);
+	tdelete((void *)key, &(pt->root), &compare_pte);
+	free(key);
 }
 
-void print_page_te(const void *nodep, const VISIT which, const int depth) {
-    PageTE *datap = *(PageTE **) nodep;
+void delete_ptes(PT *pt, long pid) {
+	PTE *pte = create_pte(pid, 0, 0);
+	while (tdelete((void *)pte, &(pt->root), &compare_pte_pid));
+	free(pte);
+}
+
+long find_pte(PT *pt, long pid, long vpn) {
+	PTE *key = create_pte(pid, vpn, 0);
+	long ppn = -1;
+	void * result = tfind((void *)key, &(pt->root), &compare_pte);
+	if(result) {
+		ppn = (*(PTE **)result)->ppn;
+	}
+	free(key);
+	return ppn;
+}
+
+void free_pte(void *nodep) {
+	PTE *datap = (PTE *) nodep;
+	free(datap);
+}
+
+void clear_pt(PT *pt) {
+	tdestroy(pt->root, &free_pte);
+	pt->root = NULL;
+}
+
+void print_pte(const void *nodep, const VISIT which, const int depth) {
+    PTE *datap = *(PTE **) nodep;
     switch (which) {
 		case preorder:
 			break;
 		case postorder:
-			printf("(%s, %s) -> %d\n", datap->pid, datap->vpn, datap->ppn);
+			printf("(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
 			break;
 		case endorder:
 			break;
 		case leaf:
-			printf("(%s, %s) -> %d\n", datap->pid, datap->vpn, datap->ppn);
+			printf("(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
 			break;
 		default:
 			printf("%d\n", depth);
@@ -66,9 +92,10 @@ void print_page_te(const void *nodep, const VISIT which, const int depth) {
     }
 }
 
-void print_page_t(PageT *page_t) {
+void print_pt(PT *pt) {
 	printf("==========page table==========\n");
-	if (page_t->root) {
-		twalk(page_t->root, &print_page_te);
+	if (pt->root) {
+		twalk(pt->root, &print_pte);
 	}
+	printf("==========page table end=======\n");
 }

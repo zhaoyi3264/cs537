@@ -19,15 +19,21 @@ process_table.o: process_table.c process_table.h
 page_table.o: page_table.c page_table.h
 	$(CC) $(WARNING_FLAGS) -c page_table.c
 	
-page_frame_table.o: page_frame_table.c page_frame_table.h
-	$(CC) $(WARNING_FLAGS) -c page_frame_table.c
+page_frame.o: page_frame.c page_frame.h
+	$(CC) $(WARNING_FLAGS) -c page_frame.c
+	
+schedule_fifo.o: schedule_fifo.c schedule_algo.h page_frame.h
+	$(CC) $(WARNING_FLAGS) -c schedule_fifo.c
+	
+disk_queue.o: disk_queue.c disk_queue.h
+	$(CC) $(WARNING_FLAGS) -c disk_queue.c
 
 clean:
 	rm $(EXE) *.o
 	
-test: test.c page_table.o
+test: test.c process_table.o page_table.o page_frame.o schedule_fifo.o disk_queue.o
 	$(CC) $(WARNING_FLAGS) -c test.c
-	$(CC) -o test test.o page_table.o
+	$(CC) -o test test.o process_table.o page_table.o page_frame.o schedule_fifo.o disk_queue.o
 	
 scan-build: clean
 	scan-build -o $(SCAN_BUILD_DIR) make

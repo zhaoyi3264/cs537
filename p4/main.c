@@ -5,6 +5,9 @@
 #include <unistd.h>
 
 #include "trace_parser.h"
+#include "page_table.h"
+#include "disk_queue.h"
+#include "schedule_algo.h"
 
 int exponent(long int x) {
 	int exp = 0;
@@ -17,6 +20,34 @@ int exponent(long int x) {
 		}
 	}
 	return exp;
+}
+
+void execute_trace(char *fname) {
+	if (fname == NULL) {
+		fprintf(stderr, "error: no trace file specified\n");
+		exit(1);
+	}
+	
+	FILE *fp = fopen(fname, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "error: file %s not found\n", fname);
+		exit(1);
+	}
+	char * line = NULL;
+    size_t len = 0;
+    ssize_t size;
+    long line_num = 0;
+    
+    char *pid = NULL;
+    char *vpn = NULL;
+    
+    while ((size = getline(&line, &len, fp)) != -1) {
+		line_num++;
+        line[size - 1] = '\0';
+        pid = strtok(line, " ");
+        vpn = strtok(NULL, " ");
+	}
+	fclose(fp);
 }
 
 int main(int argc, char * argv[]) {
@@ -52,20 +83,21 @@ int main(int argc, char * argv[]) {
 		}
 	}
 	
-	//~ printf("2^%d = %ld\n", exponent(page_size), page_size);
 	int exp = exponent(page_size);
 	if ((int)pow(2, exp) != page_size) {
 		fprintf(stderr, "error: page size must be a power of two\n");
 		exit(1);
 	}
-	int page_frame_num = pow(2, 20 - exp) * mem_size;
+	long page_frame_num = pow(2, 20 - exp) * mem_size;
 	if (page_frame_num <= 0) {
 		fprintf(stderr, "error: page size must be greater than real memory size\n");
 		exit(1);
 	}
-	printf("page size: %ld\n mem size: %d\n  pf size: %d\ntrace    : %s\n",
+	printf("page size: %ld\n mem size: %d\n  pf size: %ld\ntrace    : %s\n",
 		page_size, mem_size, page_frame_num, trace_file);
 		
 	ProcT *proc_t = parse_trace(trace_file);
 	print_proc_t(proc_t);
+	
+	execute_trace(trace_file);
 }

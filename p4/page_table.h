@@ -1,30 +1,30 @@
 #ifndef PAGE_TABLE_H
 #define PAGE_TABLE_H
 
-typedef struct PageTE {
-	char *pid;
-	char *vpn;
-	int ppn;
-} PageTE;
+typedef struct PTE {
+	long pid;
+	long vpn;
+	long ppn;
+} PTE;
 
-typedef struct PageT {
+typedef struct PT {
 	void *root;
-} PageT;
+} PT;
 
-PageTE *create_page_te(char *pid, char *vpn, int ppn);
+PTE *create_pte(long pid, long vpn, long ppn);
 
-PageT *create_page_t();
+PT *create_pt();
 
-int compare_page_te(const void *page_te_1, const void *page_te_2);
+void add_pte(PT *pt, long pid, long vpn, long ppn);
 
-PageTE *add_page_te(PageT *page_t, char *pid, char *vpn, int ppn);
+void delete_pte(PT *pt, long pid, long vpn);
 
-PageTE *find_page_te(PageT *page_t, char *pid, char *vpn);
+void delete_ptes(PT *pt, long pid);
 
-PageTE *delete_page_te(PageT *page_t, char *pid, char *vpn);
+long find_pte(PT *pt, long pid, long vpn);
 
-void clear_page_t(PageT *page_t);
+void clear_pt(PT *pt);
 
-void print_page_t(PageT *page_t);
+void print_pt(PT *pt);
 
 #endif

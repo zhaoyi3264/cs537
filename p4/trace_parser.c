@@ -15,12 +15,12 @@ int is_number(char * str) {
 	return 1;
 }
 
-void validate_pid_addr(char *str, char *pid_addr, char *line, int line_num) {
+void validate_pid_vpn(char *str, char *pid_vpn, char *line, long line_num) {
 	if (str == NULL) {
-		fprintf(stderr, "error: %d: invalid trace %s\n", line_num, line);
+		fprintf(stderr, "error: %ld: invalid trace %s\n", line_num, line);
 		exit(1);
 	} else if (is_number(str) == 0) {
-		fprintf(stderr, "error: %d: invalid %s %s\n", line_num, pid_addr, str);
+		fprintf(stderr, "error: %ld: invalid %s %s\n", line_num, pid_vpn, str);
 		exit(1);
 	}
 }
@@ -32,16 +32,21 @@ ProcT *parse_trace(char *fname) {
 	}
 	
 	FILE *fp = fopen(fname, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "error: file %s not found\n", fname);
+		exit(1);
+	}
     char * line = NULL;
     size_t len = 0;
     ssize_t size;
-    int line_num = 0;
+    long line_num = 0;
     
     ProcT *proc_t = create_proc_t();
     
     char *buf = NULL;
     char *pid = NULL;
-    char *addr = NULL;
+    char *vpn = NULL;
+    long pid_i = 0;
 
     while ((size = getline(&line, &len, fp)) != -1) {
 		line_num++;
@@ -49,42 +54,18 @@ ProcT *parse_trace(char *fname) {
         buf = malloc(strlen(line) + 1);
         sprintf(buf, "%s", line);
         pid = strtok(buf, " ");
-        validate_pid_addr(pid, "pid", line, line_num);
-        addr = strtok(NULL, " ");
-        validate_pid_addr(addr, "address", line, line_num);
-        //~ printf("%.3d: pid: %s\taddr: %s\n", line_num, pid, addr);
-        update_proc_te_trace(proc_t, pid, line_num);
-        addr = strtok(NULL, " ");
-        if (addr) {
-			fprintf(stderr, "error: %d: invalid trace %s\n", line_num, line);
+        validate_pid_vpn(pid, "pid", line, line_num);
+        vpn = strtok(NULL, " ");
+        validate_pid_vpn(vpn, "vpn", line, line_num);
+        pid_i = atoi(pid);
+        update_proc_te_trace(proc_t, pid_i, line_num);
+        vpn = strtok(NULL, " ");
+        if (vpn) {
+			fprintf(stderr, "error: %ld: invalid trace %s\n", line_num, line);
 			exit(1);
 		}
 		free(buf);
     }
 	fclose(fp);
 	return proc_t;
-}
-
-void execute_trace(char *fname) {
-	if (fname == NULL) {
-		fprintf(stderr, "error: no trace file specified\n");
-		exit(1);
-	}
-	
-	FILE *fp = fopen(fname, "r");
-    char * line = NULL;
-    size_t len = 0;
-    ssize_t size;
-    int line_num = 0;
-    
-    char *pid = NULL;
-    char *addr = NULL;
-
-    while ((size = getline(&line, &len, fp)) != -1) {
-		line_num++;
-        line[size - 1] = '\0';
-        pid = strtok(line, " ");
-        addr = strtok(NULL, " ");
-    }
-	fclose(fp);
 }
