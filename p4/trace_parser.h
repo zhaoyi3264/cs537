@@ -5,6 +5,8 @@
 
 int is_number(char * str);
 
+FILE *open_trace(char *fname);
+
 ProcT *parse_trace(char *fname);
 
 #endif

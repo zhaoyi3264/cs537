@@ -15,6 +15,15 @@ int is_number(char * str) {
 	return 1;
 }
 
+FILE *open_trace(char *fname) {
+	FILE *fp = fopen(fname, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "error: file %s not found\n", fname);
+		exit(1);
+	}
+	return fp;	
+}
+
 void validate_pid_vpn(char *str, char *pid_vpn, char *line, long line_num) {
 	if (str == NULL) {
 		fprintf(stderr, "error: %ld: invalid trace %s\n", line_num, line);
@@ -31,11 +40,7 @@ ProcT *parse_trace(char *fname) {
 		exit(1);
 	}
 	
-	FILE *fp = fopen(fname, "r");
-	if (fp == NULL) {
-		fprintf(stderr, "error: file %s not found\n", fname);
-		exit(1);
-	}
+	FILE *fp = open_trace(fname);
     char * line = NULL;
     size_t len = 0;
     ssize_t size;
@@ -67,5 +72,10 @@ ProcT *parse_trace(char *fname) {
 		free(buf);
     }
 	fclose(fp);
+	ProcTE *current = proc_t->head;
+	while (current) {
+		current->fp = open_trace(fname);;
+		current = current->next;
+	}
 	return proc_t;
 }

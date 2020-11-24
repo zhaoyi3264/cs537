@@ -19,9 +19,21 @@ void process_table() {
 		update_proc_te_trace(proc_t, i % 10, i);
 	}
 	for (int i = 0; i < 20; i += 2) {
-		delete_proc_te(proc_t, i);
+		ProcTE *proc_te = delete_proc_te(proc_t, i);
+		if (proc_te) {
+			printf("delete pid %ld\n", proc_te->pid);
+		}
+	}
+	for (int i = 0; i < 10; i++) {
+		add_ppn(proc_t, i, (rand10() + 1) * 10);
+		add_ppn(proc_t, i, i * 5);
+	}
+	for (int i = 0; i < 10; i++) {
+		remove_ppn(proc_t, i, i);
+		remove_ppn(proc_t, i, i * 5);
 	}
 	print_proc_t(proc_t);
+	free(proc_t);
 }
 
 void page_table() {
@@ -62,57 +74,40 @@ void disk_queue() {
 
 void page_frame_1() {
 	PF *pf = create_pf(5);
-	IPT *ipt = create_ipt();
 	for(int i = 0; i < 10; i++) {
-		printf("%ld\n", add_pfn(pf, ipt, i, i));
+		printf("%ld\n", add_pfn(pf, i, i));
 	}
-	delete_pfn(pf, ipt, 0);
-	delete_pfn(pf, ipt, 2);
-	delete_pfn(pf, ipt, 4);
-	printf("%ld\n", add_pfn(pf, ipt, 100, 100));
-	printf("%ld\n", add_pfn(pf, ipt, 200, 200));
-	printf("%ld\n", add_pfn(pf, ipt, 400, 400));
-	printf("%ld\n", add_pfn(pf, ipt, 500, 500));
 	print_pf(pf);
-	print_ipt(ipt);
-	free(ipt);
 	free(pf);
 }
 
 void page_frame_2() {
 	PF *pf = create_pf(5);
-	IPT *ipt = create_ipt();
 	for(int i = 0; i < 4; i++) {
-		printf("%ld\n", add_pfn(pf, ipt, 0, 0));
+		printf("%ld\n", add_pfn(pf, 0, 0));
 	}
-	printf("%ld\n", add_pfn(pf, ipt, 1, 1));
-	delete_pfns(pf, ipt, 0);
+	printf("%ld\n", add_pfn(pf, 1, 1));
+	delete_pfns(pf, 0);
 	print_pf(pf);
-	print_ipt(ipt);
 	for(int i = 1; i < 10; i++) {
-		printf("%ld\n", add_pfn(pf, ipt, i * 100, i * 100));
+		printf("%ld\n", add_pfn(pf, i * 100, i * 100));
 	}
 	print_pf(pf);
-	print_ipt(ipt);
-	free(ipt);
 	free(pf);
 }
 
 void fifo() {
 	PF *pf = create_pf(5);
-	IPT *ipt = create_ipt();
 	for(int i = 0; i < 9; i++) {
-		if (add_pfn(pf, ipt, i, i) == -1) {
-			replace_pfn(pf, ipt, i, i);
+		if (add_pfn(pf, i, i) == -1) {
+			replace_pfn(pf, i, i * 2);
 		}
 	}
 	for (int i = 0; i < 3; i++) {
-		replace_pfn(pf, ipt, 20, 20);
+		replace_pfn(pf, 20, i);
 	}
-	delete_pfns(pf, ipt, 20);
+	//~ delete_pfns(pf, 20);
 	print_pf(pf);
-	print_ipt(ipt);
-	free(ipt);
 	free(pf);
 }
 
@@ -121,7 +116,6 @@ void fifo_page_table() {
 	int length = 100;
 	PT* pt = create_pt();
 	PF *pf = create_pf(size);
-	IPT *ipt = create_ipt();
 	
 	long pid = 0;
 	long vpn = 0;
@@ -133,12 +127,12 @@ void fifo_page_table() {
 	for (int i = 0; i < length; i++) {
 		pid = vpn = arr[i] = rand() % 100;
 		if ((ppn = find_pte(pt, pid, vpn)) != -1) {
-			find_pfn(ipt, ppn);
+			find_pfn(pf, ppn);
 			continue;
 		}
-		ppn = add_pfn(pf, ipt, pid, vpn);
+		ppn = add_pfn(pf, pid, vpn);
 		if (ppn == -1) {
-			replaced = replace_pfn(pf, ipt, pid, vpn);
+			replaced = replace_pfn(pf, pid, vpn);
 			ppn = replaced->ppn;
 			delete_pte(pt, replaced->pid, replaced->vpn);
 			replace[replace_count++] = replaced->pid;
@@ -155,8 +149,6 @@ void fifo_page_table() {
 	printf("\n");
 	print_pt(pt);
 	print_pf(pf);
-	print_ipt(ipt);
-	free(ipt);
 	free(pf);
 	free(pt);
 }
@@ -171,6 +163,6 @@ int main() {
 	//~ page_frame_1();
 	//~ page_frame_2();
 	//~ fifo();
-	fifo_page_table();
+	//~ fifo_page_table();
 	
 }

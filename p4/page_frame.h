@@ -23,6 +23,7 @@ typedef struct PF {
 	FPFN *free_tail;
 	long capacity;
 	long count;
+	void *root;
 } PF;
 
 typedef struct IPTE {
@@ -30,13 +31,15 @@ typedef struct IPTE {
 	PFN *pfn;
 } IPTE;
 
-typedef struct IPT {
-	void *root;
-} IPT;
+//~ typedef struct IPT {
+	//~ void *root;
+//~ } IPT;
 
 IPTE *create_ipte(long ppn, PFN* pfn);
 
 int compare_ipte(const void *a, const void *b);
+
+PFN *create_pfn(long ppn, long pid, long vpn);
 
 PF *create_pf(long capacity);
 
@@ -44,18 +47,20 @@ void add_fpfn(PF *pf, long ppn);
 
 long remove_fpfn(PF *pf);
 
-long add_pfn(PF *pf, IPT *ipt, long pid, long vpn);
+void add_pfn_helper(PF *pf, PFN *pfn);
 
-int delete_pfn(PF *pf, IPT *ipt, long ppn);
+long add_pfn(PF *pf, long pid, long vpn);
 
-void delete_pfns(PF *pf, IPT *ipt, long pid);
+int delete_pfn(PF *pf, long ppn);
 
-void find_pfn(IPT *ipt, long ppn);
+void delete_pfns(PF *pf, long pid);
 
-void print_pf(PF *page_frame);
+void find_pfn(PF *pf, long ppn);
 
-IPT *create_ipt();
+void print_pf(PF *pf);
 
-void print_ipt(IPT *ipt);
+//~ IPT *create_ipt();
+
+//~ void print_ipt(IPT *ipt);
 
 #endif

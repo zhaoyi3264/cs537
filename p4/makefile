@@ -4,8 +4,8 @@ LIB_FLAGS = -lm
 EXE = 537pfsim-fifo
 SCAN_BUILD_DIR = scan-build-out
 
-all: main.o trace_parser.o process_table.o
-	$(CC) -o $(EXE) main.o trace_parser.o process_table.o $(LIB_FLAGS)
+all: main.o trace_parser.o process_table.o page_table.o page_frame.o schedule_fifo.o disk_queue.o
+	$(CC) -o $(EXE) main.o trace_parser.o process_table.o page_table.o page_frame.o schedule_fifo.o disk_queue.o $(LIB_FLAGS)
 
 main.o: main.c
 	$(CC) $(WARNING_FLAGS) -c main.c

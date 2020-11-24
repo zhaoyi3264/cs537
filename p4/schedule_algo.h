@@ -3,6 +3,6 @@
 
 #include "page_frame.h"
 
-PFN *replace_pfn(PF *pf, IPT *ipt, long pid, long vpn);
+PFN *replace_pfn(PF *pf, long pid, long vpn);
 
 #endif

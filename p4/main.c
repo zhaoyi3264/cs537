@@ -7,6 +7,7 @@
 #include "trace_parser.h"
 #include "page_table.h"
 #include "disk_queue.h"
+#include "page_frame.h"
 #include "schedule_algo.h"
 
 int exponent(long int x) {
@@ -22,40 +23,11 @@ int exponent(long int x) {
 	return exp;
 }
 
-void execute_trace(char *fname) {
-	if (fname == NULL) {
-		fprintf(stderr, "error: no trace file specified\n");
-		exit(1);
-	}
-	
-	FILE *fp = fopen(fname, "r");
-	if (fp == NULL) {
-		fprintf(stderr, "error: file %s not found\n", fname);
-		exit(1);
-	}
-	char * line = NULL;
-    size_t len = 0;
-    ssize_t size;
-    long line_num = 0;
-    
-    char *pid = NULL;
-    char *vpn = NULL;
-    
-    while ((size = getline(&line, &len, fp)) != -1) {
-		line_num++;
-        line[size - 1] = '\0';
-        pid = strtok(line, " ");
-        vpn = strtok(NULL, " ");
-	}
-	fclose(fp);
-}
-
-int main(int argc, char * argv[]) {
+char *parse_cmd(int argc, char *argv[], long *page_frame_num) {
 	int opt = 0;
-	long int page_size = 4096;
 	int mem_size = 1;
+	long int page_size = 4096;
 	char *trace_file = NULL;
-	
 	while ((opt = getopt(argc, argv, "-p:m:")) != -1) {
 		switch (opt) {
 			case 'p':
@@ -88,16 +60,73 @@ int main(int argc, char * argv[]) {
 		fprintf(stderr, "error: page size must be a power of two\n");
 		exit(1);
 	}
-	long page_frame_num = pow(2, 20 - exp) * mem_size;
-	if (page_frame_num <= 0) {
+	*page_frame_num = pow(2, 20 - exp) * mem_size;
+	if (*page_frame_num <= 0) {
 		fprintf(stderr, "error: page size must be greater than real memory size\n");
 		exit(1);
 	}
-	printf("page size: %ld\n mem size: %d\n  pf size: %ld\ntrace    : %s\n",
-		page_size, mem_size, page_frame_num, trace_file);
-		
-	ProcT *proc_t = parse_trace(trace_file);
+	printf("page size: %ld\n mem size: %d\n  pf size: %ld\n    trace: %s\n",
+		page_size, mem_size, *page_frame_num, trace_file);
+	return trace_file;
+}
+
+void disk_io(ProcT *proc_t, PT *pt, PF *pf, long pid, long vpn) {
+	long ppn = 0;
+	// add page frame and page table
+	ppn = add_pfn(pf, pid, vpn);
+	if (ppn == -1) {
+		PFN *replaced = replace_pfn(pf, pid, vpn);
+		ppn = replaced->ppn;
+		delete_pte(pt, replaced->pid, replaced->vpn);
+		// update process table
+		remove_ppn(proc_t, replaced->pid, ppn);
+	}
+	add_pte(pt, pid, vpn, ppn);
+	// update process table
+	add_ppn(proc_t, pid, ppn);
+}
+
+int main(int argc, char * argv[]) {
+	long page_frame_num = 0;
+	char *fname = parse_cmd(argc, argv, &page_frame_num);
+	ProcTE *proc_te = NULL;
+	ProcT *proc_t = parse_trace(fname);
 	print_proc_t(proc_t);
+
+	//~ long real = 0;
+	//~ long cpu;
+
+	FILE *fp = open_trace(fname);
+	char * line = NULL;
+	size_t len = 0;
+	ssize_t size;
+	long line_num = 0;
 	
-	execute_trace(trace_file);
+	long pid = 0;
+	long vpn = 0;
+	long ppn = 0;
+	
+	PT *pt = create_pt();
+	Node *node = NULL;
+	DiskQueue *dq = create_dq(5);
+	PFN *pfn = NULL;
+	PF *pf = create_pf(page_frame_num);
+	//~ while ((size = getline(&line, &len, fp)) != -1) {
+		
+	//~ }
+	while (1) {
+		if ((node = advance(dq))) {
+			pid = node->pid;
+			vpn = node->vpn;
+			disk_io(proc_t, pt, pf, pid, vpn);
+			node = NULL;
+		}
+		if ((proc_te = find_runnable_least_fp(proc_t))) {
+			// find
+			if ((ppn = find_pte(pt, pid, vpn)) != -1) {
+				find_pfn(pf, ppn);
+				continue;
+			}
+		}
+	}
 }
