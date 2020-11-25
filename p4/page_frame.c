@@ -12,27 +12,11 @@ IPTE *create_ipte(long ppn, PFN* pfn) {
 	return ipte;
 }
 
-//~ IPT *create_ipt() {
-	//~ IPT *ipt = malloc(sizeof(IPT));
-	//~ ipt->root = NULL;
-	//~ return ipt;
-//~ }
-
 int compare_ipte(const void *a, const void *b) {
 	IPTE *ipte_1 = (IPTE *)a;
 	IPTE *ipte_2 = (IPTE *)b;
 	return ipte_1->ppn - ipte_2->ppn;
 }
-
-//~ void free_ipte(void *nodep) {
-	//~ IPTE *datap = (IPTE *) nodep;
-	//~ free(datap);
-//~ }
-
-//~ void clear_ipt(IPT *ipt) {
-	//~ tdestroy(ipt->root, &free_ipte);
-	//~ ipt->root = NULL;
-//~ }
 
 void print_ipte(const void *nodep, const VISIT which, const int depth) {
     IPTE *datap = *(IPTE **) nodep;
@@ -40,26 +24,18 @@ void print_ipte(const void *nodep, const VISIT which, const int depth) {
 		case preorder:
 			break;
 		case postorder:
-			printf("%ld -> (%ld, %ld)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
+			fprintf(stderr, "\t%ld -> (%ld, %ld)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
 			break;
 		case endorder:
 			break;
 		case leaf:
-			printf("%ld -> (%ld, %ld)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
+			fprintf(stderr, "\t%ld -> (%ld, %ld)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
 			break;
 		default:
-			printf("%d\n", depth);
+			fprintf(stderr, "%d\n", depth);
 			break;
     }
 }
-
-//~ void print_ipt(IPT *ipt) {
-	//~ printf("==========invert page table==========\n");
-	//~ if (ipt->root) {
-		//~ twalk(ipt->root, &print_ipte);
-	//~ }
-	//~ printf("==========invert page table end=======\n");
-//~ }
 
 FPFN *create_fpfn(long ppn) {
 	FPFN *fpfn = malloc(sizeof(FPFN));
@@ -88,6 +64,7 @@ PF *create_pf(long capacity) {
 	pf->free_tail = NULL;
 	pf->capacity = capacity;
 	pf->count = 0;
+	pf->size = 0;
 	pf->root = NULL;
 	return pf;
 }
@@ -102,7 +79,7 @@ void add_fpfn(PF *pf, long ppn) {
 	pf->free_tail = fpfn;
 }
 
-long remove_fpfn(PF *pf) {
+long delete_fpfn(PF *pf) {
 	FPFN *fpfn = pf->free_head;
 	pf->free_head = pf->free_head->next;
 	long ppn = fpfn->ppn;
@@ -118,17 +95,18 @@ void add_pfn_helper(PF *pf, PFN *pfn) {
 		pf->head = pfn;
 	}
 	pf->tail = pfn;
+	pf->size++;
 }
 
 long add_pfn(PF *pf, long pid, long vpn) {
 	int add = 0;
 	long ppn = 0;
-	if (pf->count < pf->capacity) {
+	if (pf->free_head) {
+		add = 1;
+		ppn = delete_fpfn(pf);
+	} else if (pf->count < pf->capacity) {
 		add = 1;
 		ppn = pf->count++;
-	} else if (pf->free_head) {
-		add = 1;
-		ppn = remove_fpfn(pf);
 	}
 	if (add) {
 		PFN *pfn = create_pfn(ppn, pid, vpn);
@@ -143,14 +121,20 @@ long add_pfn(PF *pf, long pid, long vpn) {
 void delete_pfn_helper(PF *pf, PFN *pfn) {
 	if (pfn->prev) {
 		pfn->prev->next = pfn->next;
+		if (pfn->next) {
+			pfn->next->prev = pfn->prev;
+		} else {
+			pf->tail = pfn->prev;
+		}
 	} else {
 		pf->head = pfn->next;
+		if (pf->head) {
+			pf->head->prev = NULL;
+		} else {
+			pf->tail = NULL;
+		}
 	}
-	if (pfn->next) {
-		pfn->next->prev = pfn->prev;
-	} else {
-		pf->tail = pfn->prev;
-	}
+	pf->size--;
 }
 
 int delete_pfn(PF *pf, long ppn) {
@@ -190,33 +174,34 @@ void delete_pfns(PF *pf, long pid) {
 void find_pfn(PF *pf, long ppn) {
 	IPTE *key = create_ipte(ppn, NULL);
 	void * result = tfind((void *)key, &(pf->root), &compare_ipte);
-	if(result) {
+	if (result) {
 		(*(IPTE **)result)->pfn->reference = 1;
+		//~ printf("%ld -> (%ld, %ld)\n", ppn, (*(IPTE **)result)->pfn->pid, (*(IPTE **)result)->pfn->vpn);
 	}
 	free(key);
 }
 
 void print_pf(PF *pf) {
-	printf("==========page frame==========\n");
+	fprintf(stderr, "\t==========page frame==========\n");
 	PFN *pfn = pf->head;
 	while (pfn) {
-		printf("%ld -> (%ld, %ld) ref: %d\n", pfn->ppn, pfn->pid, pfn->vpn, pfn->reference);
+		fprintf(stderr, "\t%ld -> (%ld, %ld) ref: %d\n", pfn->ppn, pfn->pid, pfn->vpn, pfn->reference);
 		pfn = pfn->next;
 	}
-	printf("free ppn: ");
+	fprintf(stderr, "\tfree ppn: ");
 	FPFN *fpfn = pf->free_head;
 	while (fpfn) {
-		printf("%ld", fpfn->ppn);
+		fprintf(stderr, "%ld", fpfn->ppn);
 		fpfn = fpfn->next;
 		if (fpfn) {
-			printf("->");
+			fprintf(stderr, "->");
 		}
 	}
-	printf("\n");
-	printf("==========page frame end==========\n");
-	printf("==========invert page table==========\n");
+	fprintf(stderr, "\n");
+	fprintf(stderr, "\t==========page frame end==========\n");
+	fprintf(stderr, "\t==========invert page table==========\n");
 	if (pf->root) {
 		twalk(pf->root, &print_ipte);
 	}
-	printf("==========invert page table end=======\n");
+	fprintf(stderr, "\t==========invert page table end=======\n");
 }

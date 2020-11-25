@@ -24,9 +24,10 @@ void add_ppn(ProcT *proc_t, long pid, long ppn) {
 	}
 	proc_te->ppn_tail = p;
 	proc_te->runnable = 1;
+	proc_t->runnable++;
 }
 
-void remove_ppn(ProcT *proc_t, long pid, long ppn) {
+void delete_ppn(ProcT *proc_t, long pid, long ppn) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te == NULL) {
 		return;
@@ -49,14 +50,13 @@ void remove_ppn(ProcT *proc_t, long pid, long ppn) {
 	}
 }
 
-ProcTE *create_proc_te(long pid, long trace) {
+ProcTE *create_proc_te(long pid, long byte) {
 	ProcTE *proc_te = malloc(sizeof(ProcTE));
 	proc_te->pid = pid;
-	proc_te->first_trace = trace;
-	proc_te->last_trace = trace;
-	proc_te->runnable = 0;
+	proc_te->first_byte = byte;
+	proc_te->last_byte = byte;
+	proc_te->runnable = 1;
 	proc_te->fp = NULL;
-	proc_te->line_num = 0;
 	proc_te->ppn_head = NULL;
 	proc_te->ppn_tail = NULL;
 	proc_te->next = NULL;
@@ -67,6 +67,7 @@ ProcT *create_proc_t() {
 	ProcT *proc_t = malloc(sizeof(ProcT));
 	proc_t->head = NULL;
 	proc_t->tail = NULL;
+	proc_t->runnable = 0;
 	return proc_t;
 }
 
@@ -100,12 +101,12 @@ ProcTE *delete_proc_te(ProcT *proc_t, long pid) {
 	return NULL;
 }
 
-void update_proc_te_trace(ProcT *proc_t, long pid, long trace) {
+void update_proc_te_trace(ProcT *proc_t, long pid, long byte) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te) {
-		proc_te->last_trace = trace;
+		proc_te->last_byte = byte;
 	} else {
-		proc_te = create_proc_te(pid, trace);
+		proc_te = create_proc_te(pid, byte);
 		if (proc_t->head) {
 			proc_t->tail->next = proc_te;
 			proc_t->tail = proc_t->tail->next;
@@ -113,6 +114,7 @@ void update_proc_te_trace(ProcT *proc_t, long pid, long trace) {
 			proc_t->head = proc_te;
 			proc_t->tail = proc_t->head;
 		}
+		proc_t->runnable++;
 	}
 }
 
@@ -121,7 +123,7 @@ ProcTE *find_runnable_least_fp(ProcT *proc_t) {
 	ProcTE *least = NULL;
 	while (current) {
 		if (current->runnable &&
-			(least || ftell(current->fp) < ftell(least->fp))) {
+			(least == NULL || ftell(current->fp) < ftell(least->fp))) {
 			least = current;
 		}
 		current = current->next;
@@ -129,24 +131,46 @@ ProcTE *find_runnable_least_fp(ProcT *proc_t) {
 	return least;
 }
 
+int advance_to_next_available_line(ProcTE *proc_te) {
+	FILE *fp = proc_te->fp;
+	char *line = NULL;
+	char *token;
+	size_t len = 0;
+	ssize_t size;
+	long pid = 0;
+	
+	while (ftell(fp) <= proc_te->last_byte &&
+		(size = getline(&line, &len, fp)) != -1) {
+		line[size - 1] = '\0';
+		token = strtok(line, " ");
+		pid = strtol(token, NULL, 10);
+		if (pid == proc_te->pid) {
+			fseek(fp, -size, SEEK_CUR);
+			return 0;
+		}
+	}
+	return 1;
+}
+
 void print_proc_t(ProcT *proc_t) {
 	ProcTE *current = proc_t->head;
-	printf("==========process table==========\n");
+	fprintf(stderr, "\t==========process table==========\n");
 	while (current) {
-		printf("pid: %ld\tfirst: %ld\tlast: %ld\t",
-			current->pid, current->first_trace, current->last_trace);
+		fprintf(stderr, "\tpid: %ld\tfirst: %ld\tlast: %ld\t",
+			current->pid, current->first_byte, current->last_byte);
 		if (current->fp) {
-			printf("runnable: %d\tfp: %ld\tline: %ld\t",
-				current->runnable, ftell(current->fp), current->line_num);
+			fprintf(stderr, "runnable: %d\tfp: %.4ld\t",
+				current->runnable, ftell(current->fp));
 		}
 		PPN *ppn = current->ppn_head;
-		printf("ppn: ");
+		fprintf(stderr, "ppn: ");
 		while (ppn) {
-			printf("%ld ", ppn->ppn);
+			fprintf(stderr, "%ld ", ppn->ppn);
 			ppn = ppn->next;
 		}
-		printf("\n");
+		fprintf(stderr, "\n");
 		current = current->next;
 	}
-	printf("==========process table end=======\n");
+	fprintf(stderr, "\trunning process: %d\n", proc_t->runnable);
+	fprintf(stderr, "\t==========process table end=======\n");
 }

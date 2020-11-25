@@ -79,11 +79,15 @@ void disk_io(ProcT *proc_t, PT *pt, PF *pf, long pid, long vpn) {
 		ppn = replaced->ppn;
 		delete_pte(pt, replaced->pid, replaced->vpn);
 		// update process table
-		remove_ppn(proc_t, replaced->pid, ppn);
+		delete_ppn(proc_t, replaced->pid, ppn);
+		//~ printf("replace (%ld, %ld) -> %ld\n", replaced->pid, replaced->vpn, ppn);
 	}
+	//~ printf("assign (%ld, %ld) -> %ld\n", pid, vpn, ppn);
 	add_pte(pt, pid, vpn, ppn);
-	// update process table
 	add_ppn(proc_t, pid, ppn);
+	//~ print_proc_t(proc_t);
+	//~ print_pt(pt);
+	//~ print_pf(pf);
 }
 
 int main(int argc, char * argv[]) {
@@ -93,14 +97,17 @@ int main(int argc, char * argv[]) {
 	ProcT *proc_t = parse_trace(fname);
 	print_proc_t(proc_t);
 
-	//~ long real = 0;
-	//~ long cpu;
+	long real = 0;
+	long cpu = 0;
+	long mem_util = 0;
+	long run_proc = 0;
+	long tot_mem_ref = 0;
+	long tot_page_in = 0;
 
-	FILE *fp = open_trace(fname);
-	char * line = NULL;
+	char *line = NULL;
+	char *token = NULL;
 	size_t len = 0;
 	ssize_t size;
-	long line_num = 0;
 	
 	long pid = 0;
 	long vpn = 0;
@@ -108,25 +115,81 @@ int main(int argc, char * argv[]) {
 	
 	PT *pt = create_pt();
 	Node *node = NULL;
-	DiskQueue *dq = create_dq(5);
-	PFN *pfn = NULL;
+	DiskQueue *dq = create_dq(2000000);
+	//~ page_frame_num = 5;
 	PF *pf = create_pf(page_frame_num);
-	//~ while ((size = getline(&line, &len, fp)) != -1) {
-		
-	//~ }
+	
 	while (1) {
+		real++;
+		//~ printf("***********\ntick %.6ld\n", real);
 		if ((node = advance(dq))) {
+			//~ printf("dequeue: (%ld, %ld)\n", node->pid, node->vpn);
 			pid = node->pid;
 			vpn = node->vpn;
 			disk_io(proc_t, pt, pf, pid, vpn);
 			node = NULL;
-		}
-		if ((proc_te = find_runnable_least_fp(proc_t))) {
+		} else if ((proc_te = find_runnable_least_fp(proc_t))) {
+			size = getline(&line, &len, proc_te->fp);
+			line[size - 1] = '\0';
+			//~ printf("execute trace %s\n", line);
+			token = strtok(line, " ");
+			pid = strtol(token, NULL, 10);
+			token = strtok(NULL, " ");
+			vpn = strtol(token, NULL, 10);
 			// find
 			if ((ppn = find_pte(pt, pid, vpn)) != -1) {
 				find_pfn(pf, ppn);
-				continue;
+				tot_mem_ref++;
+				if (advance_to_next_available_line(proc_te)) {
+					// terminate
+					//~ printf("terminate %ld\n", pid);
+					proc_te = delete_proc_te(proc_t, pid);
+					fclose(proc_te->fp);
+					delete_ptes(pt, pid);
+					PPN *previous_ppn = NULL;
+					PPN *current_ppn = proc_te->ppn_head;
+					while (current_ppn) {
+						delete_pfn(pf, current_ppn->ppn);
+						previous_ppn = current_ppn;
+						current_ppn = current_ppn->next;
+						free(previous_ppn);
+					}
+					free(proc_te);
+					proc_t->runnable--;
+					//~ printf("deleted\n");
+					//~ print_proc_t(proc_t);
+					//~ print_pt(pt);
+					//~ print_pf(pf);
+					//~ exit(1);
+					// free mem
+				}
+				cpu++;
+			// page fault
+			} else {
+				//~ printf("enqueue (%ld, %ld)\n", pid, vpn);
+				enqueue(dq, pid, vpn);
+				proc_te->runnable = 0;
+				proc_t->runnable--;
+				fseek(proc_te->fp, -size, SEEK_CUR);
+				tot_page_in++;
 			}
+		} else {
+			// all blocked
+			//~ printf("all blocked\n");
+			//~ print_proc_t(proc_t);
 		}
+		if (proc_t->head == NULL) {
+			break;
+		}
+		run_proc += proc_t->runnable;
+		mem_util += pf->size;
+		//~ printf("\n");
+		//~ sleep(1);
 	}
+	// statistics
+	printf("AMU: %f\n", mem_util / (float)real / (float)page_frame_num);
+	printf("ARP: %f\n", run_proc / (float)real);
+	printf("TMR: %ld\n", tot_mem_ref);
+	printf("TPI: %ld\n", tot_page_in);
+	printf("Running Time: %ld\ncpu: %ld\n", real, cpu);
 }

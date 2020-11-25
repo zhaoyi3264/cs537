@@ -23,6 +23,7 @@ typedef struct PF {
 	FPFN *free_tail;
 	long capacity;
 	long count;
+	long size;
 	void *root;
 } PF;
 
@@ -45,7 +46,7 @@ PF *create_pf(long capacity);
 
 void add_fpfn(PF *pf, long ppn);
 
-long remove_fpfn(PF *pf);
+long delete_fpfn(PF *pf);
 
 void add_pfn_helper(PF *pf, PFN *pfn);
 

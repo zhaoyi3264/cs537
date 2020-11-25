@@ -79,23 +79,23 @@ void print_pte(const void *nodep, const VISIT which, const int depth) {
 		case preorder:
 			break;
 		case postorder:
-			printf("(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
+			fprintf(stderr, "\t(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
 			break;
 		case endorder:
 			break;
 		case leaf:
-			printf("(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
+			fprintf(stderr, "\t(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
 			break;
 		default:
-			printf("%d\n", depth);
+			fprintf(stderr, "%d\n", depth);
 			break;
     }
 }
 
 void print_pt(PT *pt) {
-	printf("==========page table==========\n");
+	fprintf(stderr, "\t==========page table==========\n");
 	if (pt->root) {
 		twalk(pt->root, &print_pte);
 	}
-	printf("==========page table end=======\n");
+	fprintf(stderr, "\t==========page table end=======\n");
 }
