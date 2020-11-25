@@ -171,16 +171,6 @@ void delete_pfns(PF *pf, long pid) {
 	}
 }
 
-void find_pfn(PF *pf, long ppn) {
-	IPTE *key = create_ipte(ppn, NULL);
-	void * result = tfind((void *)key, &(pf->root), &compare_ipte);
-	if (result) {
-		(*(IPTE **)result)->pfn->reference = 1;
-		//~ printf("%ld -> (%ld, %ld)\n", ppn, (*(IPTE **)result)->pfn->pid, (*(IPTE **)result)->pfn->vpn);
-	}
-	free(key);
-}
-
 void print_pf(PF *pf) {
 	fprintf(stderr, "\t==========page frame==========\n");
 	PFN *pfn = pf->head;

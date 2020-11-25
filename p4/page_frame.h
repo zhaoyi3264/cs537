@@ -32,10 +32,6 @@ typedef struct IPTE {
 	PFN *pfn;
 } IPTE;
 
-//~ typedef struct IPT {
-	//~ void *root;
-//~ } IPT;
-
 IPTE *create_ipte(long ppn, PFN* pfn);
 
 int compare_ipte(const void *a, const void *b);
@@ -45,6 +41,8 @@ PFN *create_pfn(long ppn, long pid, long vpn);
 PF *create_pf(long capacity);
 
 void add_fpfn(PF *pf, long ppn);
+
+void delete_pfn_helper(PF *pf, PFN *pfn);
 
 long delete_fpfn(PF *pf);
 
@@ -56,12 +54,6 @@ int delete_pfn(PF *pf, long ppn);
 
 void delete_pfns(PF *pf, long pid);
 
-void find_pfn(PF *pf, long ppn);
-
 void print_pf(PF *pf);
-
-//~ IPT *create_ipt();
-
-//~ void print_ipt(IPT *ipt);
 
 #endif

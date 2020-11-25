@@ -115,7 +115,9 @@ int main(int argc, char * argv[]) {
 	
 	PT *pt = create_pt();
 	Node *node = NULL;
-	DiskQueue *dq = create_dq(2000000);
+	long cool_down = 2000000;
+	//~ long cool_down = 5;
+	DiskQueue *dq = create_dq(cool_down);
 	//~ page_frame_num = 5;
 	PF *pf = create_pf(page_frame_num);
 	
@@ -176,7 +178,6 @@ int main(int argc, char * argv[]) {
 		} else {
 			// all blocked
 			//~ printf("all blocked\n");
-			//~ print_proc_t(proc_t);
 		}
 		if (proc_t->head == NULL) {
 			break;
