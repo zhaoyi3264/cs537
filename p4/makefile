@@ -1,4 +1,4 @@
-CC = gcc -pg
+CC = gcc
 WARNING_FLAGS = -Wall -Wextra -pedantic
 LIB_FLAGS = -lm
 EXE_FIFO = 537pfsim-fifo

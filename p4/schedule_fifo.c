@@ -18,6 +18,7 @@ PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 		return NULL;
 	}
 	PFN *replaced = pf->head;
+	//~ replaced->next = NULL;
 	pf->head = pf->head->next;
 	pf->head->prev = NULL;
 	IPTE *key = create_ipte(replaced->ppn, NULL);

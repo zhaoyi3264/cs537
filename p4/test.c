@@ -28,10 +28,6 @@ void process_table() {
 		add_ppn(proc_t, i, (rand10() + 1) * 10);
 		add_ppn(proc_t, i, i * 5);
 	}
-	for (int i = 0; i < 10; i++) {
-		remove_ppn(proc_t, i, i);
-		remove_ppn(proc_t, i, i * 5);
-	}
 	print_proc_t(proc_t);
 	free(proc_t);
 }
@@ -164,5 +160,8 @@ int main() {
 	//~ page_frame_2();
 	//~ fifo();
 	//~ fifo_page_table();
-	
+	PF *pf = create_pf(5);
+	add_pfn(pf, 1, 2);
+	add_pfn(pf, 2, 4);
+	print_pf(pf);
 }

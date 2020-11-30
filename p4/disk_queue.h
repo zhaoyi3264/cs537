@@ -20,6 +20,8 @@ void enqueue(DiskQueue *dq, unsigned long pid, unsigned long vpn);
 
 Node *advance(DiskQueue*dq);
 
+Node *fast_forward(DiskQueue *dq, long *elapse);
+
 void print_dq(DiskQueue *dq);
 
 #endif

@@ -50,15 +50,23 @@ Node *advance(DiskQueue*dq) {
 	return NULL;
 }
 
+Node *fast_forward(DiskQueue *dq, long *elapse) {
+	if (dq->head) {
+		*elapse = dq->count_down - 1;
+		dq->count_down = dq->cool_down;
+	}
+	return dequeue(dq);
+}
+
 void print_dq(DiskQueue *dq) {
-	printf("==========disk queue==========\n");
+	fprintf(stderr, "\t==========disk queue==========\n\t");
 	Node *current = dq->head;
 	while (current) {
-		printf("(%lu, %lu)", current->pid, current->vpn);
+		fprintf(stderr, "(%lu, %lu)", current->pid, current->vpn);
 		current = current->next;
 		if (current) {
-			printf("->");
+			fprintf(stderr, "->");
 		}
 	}
-	printf("\n==========disk queue end=======\n");
+	fprintf(stderr, "\n\t==========disk queue end=======\n");
 }

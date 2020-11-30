@@ -65,18 +65,20 @@ char *parse_cmd(int argc, char *argv[], long *page_frame_num) {
 		fprintf(stderr, "error: page size must be greater than real memory size\n");
 		exit(1);
 	}
-	printf("page size: %ld\n mem size: %d\n  pf size: %ld\n    trace: %s\n",
-		page_size, mem_size, *page_frame_num, trace_file);
+	//~ printf("page size: %ld\n mem size: %d\n  pf size: %ld\n    trace: %s\n",
+		//~ page_size, mem_size, *page_frame_num, trace_file);
 	return trace_file;
 }
 
 void disk_io(ProcT *proc_t, PT *pt, PF *pf, unsigned long pid, unsigned long vpn) {
-	long ppn = 0;
+	long ppn = -1;
 	// add page frame and page table
 	ppn = add_pfn(pf, pid, vpn);
+	//~ printf("pfn added %ld\n", ppn);
 	if (ppn == -1) {
 		PFN *replaced = replace_pfn(pf, pid, vpn);
 		ppn = replaced->ppn;
+		//~ printf("pfn replaced %ld\n", ppn);
 		delete_pte(pt, replaced->pid, replaced->vpn);
 		// update process table
 		delete_ppn(proc_t, replaced->pid, ppn);
@@ -116,7 +118,7 @@ int main(int argc, char * argv[]) {
 	PT *pt = create_pt();
 	Node *node = NULL;
 	long cool_down = 2000000;
-	//~ long cool_down = 5;
+	//~ cool_down = 1;
 	DiskQueue *dq = create_dq(cool_down);
 	//~ page_frame_num = 5;
 	PF *pf = create_pf(page_frame_num);
@@ -124,20 +126,25 @@ int main(int argc, char * argv[]) {
 	while (1) {
 		real++;
 		//~ printf("***********\ntick %.6ld\n", real);
-		if ((node = advance(dq))) {
-			//~ printf("dequeue: (%lu, %lu)\n", node->pid, node->vpn);
-			pid = node->pid;
-			vpn = node->vpn;
-			disk_io(proc_t, pt, pf, pid, vpn);
+		if (proc_t->runnable == 0) {
+			// all blocked
+			//~ printf("all blocked\n");
+			long elapse = 0;
+			node = fast_forward(dq, &elapse);
+			real += elapse;
+			mem_util += (pf->size) * elapse;
+			//~ run_proc += (proc_t->runnable) * elapse;
+			disk_io(proc_t, pt, pf, node->pid, node->vpn);
+			free(node);
 			node = NULL;
 		} else if ((proc_te = find_runnable_least_fp(proc_t))) {
 			size = getline(&line, &len, proc_te->fp);
 			line[size - 1] = '\0';
 			//~ printf("execute trace %s\n", line);
 			token = strtok(line, " ");
-			pid = strtol(token, NULL, 10);
+			pid = strtoul(token, NULL, 10);
 			token = strtok(NULL, " ");
-			vpn = strtol(token, NULL, 10);
+			vpn = strtoul(token, NULL, 10);
 			// find
 			if ((ppn = find_pte(pt, pid, vpn)) != -1) {
 				find_pfn(pf, ppn);
@@ -150,7 +157,9 @@ int main(int argc, char * argv[]) {
 					delete_ptes(pt, pid);
 					PPN *previous_ppn = NULL;
 					PPN *current_ppn = proc_te->ppn_head;
+					//~ print_proc_t(proc_t);
 					while (current_ppn) {
+						//~ printf("free %ld\n", current_ppn->ppn);
 						delete_pfn(pf, current_ppn->ppn);
 						previous_ppn = current_ppn;
 						current_ppn = current_ppn->next;
@@ -158,7 +167,7 @@ int main(int argc, char * argv[]) {
 					}
 					free(proc_te);
 					proc_t->runnable--;
-					//~ printf("deleted\n");
+					printf("terminated %lu\n", pid);
 					//~ print_proc_t(proc_t);
 					//~ print_pt(pt);
 					//~ print_pf(pf);
@@ -175,9 +184,6 @@ int main(int argc, char * argv[]) {
 				fseek(proc_te->fp, -size, SEEK_CUR);
 				tot_page_in++;
 			}
-		} else {
-			// all blocked
-			//~ printf("all blocked\n");
 		}
 		if (proc_t->head == NULL) {
 			break;
@@ -185,12 +191,14 @@ int main(int argc, char * argv[]) {
 		run_proc += proc_t->runnable;
 		mem_util += pf->size;
 		//~ printf("\n");
+		//~ print_pt(pt);
 		//~ sleep(1);
 	}
+	
 	// statistics
-	printf("AMU: %f\n", mem_util / (float)real / (float)page_frame_num);
-	printf("ARP: %f\n", run_proc / (float)real);
-	printf("TMR: %ld\n", tot_mem_ref);
-	printf("TPI: %ld\n", tot_page_in);
-	printf("Running Time: %ld\ncpu: %ld\n", real, cpu);
+	printf("AMU:\t%f\n", mem_util / (float)real / (float)page_frame_num);
+	printf("ARP:\t%f\n", run_proc / (float)real);
+	printf("TMR:\t%ld\n", tot_mem_ref);
+	printf("TPI:\t%ld\n", tot_page_in);
+	printf("R Time: %ld\nC Time: %ld\n", real, cpu);
 }

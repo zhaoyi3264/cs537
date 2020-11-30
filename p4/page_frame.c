@@ -100,7 +100,7 @@ void add_pfn_helper(PF *pf, PFN *pfn) {
 
 long add_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 	int add = 0;
-	long ppn = 0;
+	long ppn = -1;
 	if (pf->free_head) {
 		add = 1;
 		ppn = delete_fpfn(pf);
@@ -119,21 +119,21 @@ long add_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 }
 
 void delete_pfn_helper(PF *pf, PFN *pfn) {
-	if (pfn->prev) {
-		pfn->prev->next = pfn->next;
-		if (pfn->next) {
-			pfn->next->prev = pfn->prev;
-		} else {
-			pf->tail = pfn->prev;
-		}
-	} else {
+	if (pfn->prev == NULL && pfn->next == NULL) {
+		pf->head = NULL;
+		pf->tail = NULL;
+	} else if (pfn->prev == NULL) {
 		pf->head = pfn->next;
-		if (pf->head) {
-			pf->head->prev = NULL;
-		} else {
-			pf->tail = NULL;
-		}
+		pf->head->prev = NULL;
+	} else if (pfn->next == NULL) {
+		pf->tail = pfn->prev;
+		pf->tail->next = NULL;
+	} else {
+		pfn->prev->next = pfn->next;
+		pfn->next->prev = pfn->prev;
 	}
+	pfn->prev = NULL;
+	pfn->next = NULL;
 	pf->size--;
 }
 
