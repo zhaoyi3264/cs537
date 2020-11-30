@@ -11,7 +11,7 @@ PPN *create_ppn(long ppn) {
 	return p;
 }
 
-void add_ppn(ProcT *proc_t, long pid, long ppn) {
+void add_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te == NULL) {
 		return;
@@ -27,7 +27,7 @@ void add_ppn(ProcT *proc_t, long pid, long ppn) {
 	proc_t->runnable++;
 }
 
-void delete_ppn(ProcT *proc_t, long pid, long ppn) {
+void delete_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te == NULL) {
 		return;
@@ -50,7 +50,7 @@ void delete_ppn(ProcT *proc_t, long pid, long ppn) {
 	}
 }
 
-ProcTE *create_proc_te(long pid, long byte) {
+ProcTE *create_proc_te(unsigned long pid, long byte) {
 	ProcTE *proc_te = malloc(sizeof(ProcTE));
 	proc_te->pid = pid;
 	proc_te->first_byte = byte;
@@ -71,7 +71,7 @@ ProcT *create_proc_t() {
 	return proc_t;
 }
 
-ProcTE *find_proc_te(ProcT *proc_t, long pid) {
+ProcTE *find_proc_te(ProcT *proc_t, unsigned long pid) {
 	ProcTE *current = proc_t->head;
 	while (current) {
 		if (current->pid == pid) {
@@ -82,7 +82,7 @@ ProcTE *find_proc_te(ProcT *proc_t, long pid) {
 	return NULL;
 }
 
-ProcTE *delete_proc_te(ProcT *proc_t, long pid) {
+ProcTE *delete_proc_te(ProcT *proc_t, unsigned long pid) {
 	if (proc_t->head->pid == pid) {
 		ProcTE *prev_head = proc_t->head;
 		proc_t->head = proc_t->head->next;
@@ -101,7 +101,7 @@ ProcTE *delete_proc_te(ProcT *proc_t, long pid) {
 	return NULL;
 }
 
-void update_proc_te_trace(ProcT *proc_t, long pid, long byte) {
+void update_proc_te_trace(ProcT *proc_t, unsigned long pid, long byte) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te) {
 		proc_te->last_byte = byte;
@@ -137,7 +137,7 @@ int advance_to_next_available_line(ProcTE *proc_te) {
 	char *token;
 	size_t len = 0;
 	ssize_t size;
-	long pid = 0;
+	unsigned long pid = 0;
 	
 	while (ftell(fp) <= proc_te->last_byte &&
 		(size = getline(&line, &len, fp)) != -1) {

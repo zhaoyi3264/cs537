@@ -5,6 +5,6 @@
 
 void find_pfn(PF *pf, long ppn);
 
-PFN *replace_pfn(PF *pf, long pid, long vpn);
+PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn);
 
 #endif

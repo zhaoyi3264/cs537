@@ -7,7 +7,7 @@ typedef struct PPN {
 } PPN;
 
 typedef struct ProcTE {
-	long pid;
+	unsigned long pid;
 	long first_byte;
 	long last_byte;
 	
@@ -25,19 +25,19 @@ typedef struct ProcT {
 	int runnable;
 } ProcT;
 
-void add_ppn(ProcT *proc_t, long pid, long ppn);
+void add_ppn(ProcT *proc_t, unsigned long pid, long ppn);
 
-void delete_ppn(ProcT *proc_t, long pid, long ppn);
+void delete_ppn(ProcT *proc_t, unsigned long pid, long ppn);
 
-ProcTE *create_proc_te(long pid, long trace);
+ProcTE *create_proc_te(unsigned long pid, long trace);
 
 ProcT *create_proc_t();
 
-ProcTE *find_proc_te(ProcT *proc_t, long pid);
+ProcTE *find_proc_te(ProcT *proc_t, unsigned long pid);
 
-ProcTE *delete_proc_te(ProcT *proc_t, long pid);
+ProcTE *delete_proc_te(ProcT *proc_t, unsigned long pid);
 
-void update_proc_te_trace(ProcT *proc_t, long pid, long trace);
+void update_proc_te_trace(ProcT *proc_t, unsigned long pid, long trace);
 
 ProcTE *find_runnable_least_fp(ProcT *proc_t);
 

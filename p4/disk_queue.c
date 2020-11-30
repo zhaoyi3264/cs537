@@ -3,7 +3,7 @@
 
 #include "disk_queue.h"
 
-Node *create_node(long pid, long vpn) {
+Node *create_node(unsigned long pid, unsigned long vpn) {
 	Node *node = malloc(sizeof(Node));
 	node->pid = pid;
 	node->vpn = vpn;
@@ -20,7 +20,7 @@ DiskQueue *create_dq(long cool_down) {
 	return dq;
 }
 
-void enqueue(DiskQueue *dq, long pid, long vpn) {
+void enqueue(DiskQueue *dq, unsigned long pid, unsigned long vpn) {
 	Node *node = create_node(pid, vpn);
 	if (dq->head) {
 		dq->tail->next = node;
@@ -54,7 +54,7 @@ void print_dq(DiskQueue *dq) {
 	printf("==========disk queue==========\n");
 	Node *current = dq->head;
 	while (current) {
-		printf("(%ld, %ld)", current->pid, current->vpn);
+		printf("(%lu, %lu)", current->pid, current->vpn);
 		current = current->next;
 		if (current) {
 			printf("->");

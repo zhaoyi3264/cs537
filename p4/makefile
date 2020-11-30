@@ -1,4 +1,4 @@
-CC = gcc
+CC = gcc -pg
 WARNING_FLAGS = -Wall -Wextra -pedantic
 LIB_FLAGS = -lm
 EXE_FIFO = 537pfsim-fifo
@@ -15,7 +15,7 @@ all: 537pfsim-fifo 537pfsim-lru 537pfsim-clock
 	$(CC) -o $(EXE_LRU) main.o trace_parser.o process_table.o page_table.o page_frame.o schedule_lru.o disk_queue.o $(LIB_FLAGS)
 
 537pfsim-clock: main.o trace_parser.o process_table.o page_table.o page_frame.o schedule_clock.o disk_queue.o
-	$(CC) -o $(EXE_LRU) main.o trace_parser.o process_table.o page_table.o page_frame.o schedule_clock.o disk_queue.o $(LIB_FLAGS)
+	$(CC) -o $(EXE_CLOCK) main.o trace_parser.o process_table.o page_table.o page_frame.o schedule_clock.o disk_queue.o $(LIB_FLAGS)
 
 main.o: main.c
 	$(CC) $(WARNING_FLAGS) -c main.c
@@ -45,7 +45,7 @@ disk_queue.o: disk_queue.c disk_queue.h
 	$(CC) $(WARNING_FLAGS) -c disk_queue.c
 
 clean:
-	rm $(EXE_FIFO) $(EXE_LRU) $(EXE_CLOCK) *.o
+	rm -f $(EXE_FIFO) $(EXE_LRU) $(EXE_CLOCK) *.o
 	
 test: test.c process_table.o page_table.o page_frame.o schedule_fifo.o disk_queue.o
 	$(CC) $(WARNING_FLAGS) -c test.c

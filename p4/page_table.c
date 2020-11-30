@@ -6,7 +6,7 @@
 
 #include "page_table.h"
 
-PTE *create_pte(long pid, long vpn, long ppn) {
+PTE *create_pte(unsigned long pid, unsigned long vpn, long ppn) {
 	PTE *pte = malloc(sizeof(PTE));
 	pte->pid = pid;
 	pte->vpn = vpn;
@@ -35,24 +35,24 @@ int compare_pte_pid(const void *a, const void *b) {
 	return pte_1->pid - pte_2->pid;
 }
 
-void add_pte(PT *pt, long pid, long vpn, long ppn) {
+void add_pte(PT *pt, unsigned long pid, unsigned long vpn, long ppn) {
 	PTE *pte = create_pte(pid, vpn, ppn);
 	tsearch((void *)pte, &(pt->root), &compare_pte);
 }
 
-void delete_pte(PT *pt, long pid, long vpn) {
+void delete_pte(PT *pt, unsigned long pid, unsigned long vpn) {
 	PTE *key = create_pte(pid, vpn, 0);
 	tdelete((void *)key, &(pt->root), &compare_pte);
 	free(key);
 }
 
-void delete_ptes(PT *pt, long pid) {
+void delete_ptes(PT *pt, unsigned long pid) {
 	PTE *pte = create_pte(pid, 0, 0);
 	while (tdelete((void *)pte, &(pt->root), &compare_pte_pid));
 	free(pte);
 }
 
-long find_pte(PT *pt, long pid, long vpn) {
+long find_pte(PT *pt, unsigned long pid, unsigned long vpn) {
 	PTE *key = create_pte(pid, vpn, 0);
 	long ppn = -1;
 	void * result = tfind((void *)key, &(pt->root), &compare_pte);
@@ -79,12 +79,12 @@ void print_pte(const void *nodep, const VISIT which, const int depth) {
 		case preorder:
 			break;
 		case postorder:
-			fprintf(stderr, "\t(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
+			fprintf(stderr, "\t(%lu, %lu) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
 			break;
 		case endorder:
 			break;
 		case leaf:
-			fprintf(stderr, "\t(%ld, %ld) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
+			fprintf(stderr, "\t(%lu, %lu) -> %ld\n", datap->pid, datap->vpn, datap->ppn);
 			break;
 		default:
 			fprintf(stderr, "%d\n", depth);

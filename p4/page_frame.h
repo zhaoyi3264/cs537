@@ -8,8 +8,8 @@ typedef struct FPFN {
 
 typedef struct PFN {
 	long ppn;
-	long pid;
-	long vpn;
+	unsigned long pid;
+	unsigned long vpn;
 	struct PFN *prev;
 	struct PFN *next;
 	int reference;
@@ -36,7 +36,7 @@ IPTE *create_ipte(long ppn, PFN* pfn);
 
 int compare_ipte(const void *a, const void *b);
 
-PFN *create_pfn(long ppn, long pid, long vpn);
+PFN *create_pfn(long ppn, unsigned long pid, unsigned long vpn);
 
 PF *create_pf(long capacity);
 
@@ -48,11 +48,11 @@ long delete_fpfn(PF *pf);
 
 void add_pfn_helper(PF *pf, PFN *pfn);
 
-long add_pfn(PF *pf, long pid, long vpn);
+long add_pfn(PF *pf, unsigned long pid, unsigned long vpn);
 
 int delete_pfn(PF *pf, long ppn);
 
-void delete_pfns(PF *pf, long pid);
+void delete_pfns(PF *pf, unsigned long pid);
 
 void print_pf(PF *pf);
 

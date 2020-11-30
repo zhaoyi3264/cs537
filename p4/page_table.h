@@ -2,8 +2,8 @@
 #define PAGE_TABLE_H
 
 typedef struct PTE {
-	long pid;
-	long vpn;
+	unsigned long pid;
+	unsigned long vpn;
 	long ppn;
 } PTE;
 
@@ -11,17 +11,17 @@ typedef struct PT {
 	void *root;
 } PT;
 
-PTE *create_pte(long pid, long vpn, long ppn);
+PTE *create_pte(unsigned long pid, unsigned long vpn, long ppn);
 
 PT *create_pt();
 
-void add_pte(PT *pt, long pid, long vpn, long ppn);
+void add_pte(PT *pt, unsigned long pid, unsigned long vpn, long ppn);
 
-void delete_pte(PT *pt, long pid, long vpn);
+void delete_pte(PT *pt, unsigned long pid, unsigned long vpn);
 
-void delete_ptes(PT *pt, long pid);
+void delete_ptes(PT *pt, unsigned long pid);
 
-long find_pte(PT *pt, long pid, long vpn);
+long find_pte(PT *pt, unsigned long pid, unsigned long vpn);
 
 void clear_pt(PT *pt);
 

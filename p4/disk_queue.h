@@ -16,7 +16,7 @@ typedef struct DiskQueue {
 
 DiskQueue *create_dq(long cool_down);
 
-void enqueue(DiskQueue *dq, long pid, long vpn);
+void enqueue(DiskQueue *dq, unsigned long pid, unsigned long vpn);
 
 Node *advance(DiskQueue*dq);
 

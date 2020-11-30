@@ -24,12 +24,12 @@ void print_ipte(const void *nodep, const VISIT which, const int depth) {
 		case preorder:
 			break;
 		case postorder:
-			fprintf(stderr, "\t%ld -> (%ld, %ld)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
+			fprintf(stderr, "\t%ld -> (%lu, %lu)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
 			break;
 		case endorder:
 			break;
 		case leaf:
-			fprintf(stderr, "\t%ld -> (%ld, %ld)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
+			fprintf(stderr, "\t%ld -> (%lu, %lu)\n", datap->ppn, datap->pfn->pid, datap->pfn->vpn);
 			break;
 		default:
 			fprintf(stderr, "%d\n", depth);
@@ -44,7 +44,7 @@ FPFN *create_fpfn(long ppn) {
 	return fpfn;
 }
 
-PFN *create_pfn(long ppn, long pid, long vpn) {
+PFN *create_pfn(long ppn, unsigned long pid, unsigned long vpn) {
 	PFN *pfn = malloc(sizeof(PFN));
 	pfn->ppn= ppn;
 	pfn->pid = pid;
@@ -98,7 +98,7 @@ void add_pfn_helper(PF *pf, PFN *pfn) {
 	pf->size++;
 }
 
-long add_pfn(PF *pf, long pid, long vpn) {
+long add_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 	int add = 0;
 	long ppn = 0;
 	if (pf->free_head) {
@@ -153,7 +153,7 @@ int delete_pfn(PF *pf, long ppn) {
 	}
 }
 
-void delete_pfns(PF *pf, long pid) {
+void delete_pfns(PF *pf, unsigned long pid) {
 	PFN *pfn = pf->head;
 	PFN *next = NULL;
 	while (pfn) {
@@ -175,7 +175,7 @@ void print_pf(PF *pf) {
 	fprintf(stderr, "\t==========page frame==========\n");
 	PFN *pfn = pf->head;
 	while (pfn) {
-		fprintf(stderr, "\t%ld -> (%ld, %ld) ref: %d\n", pfn->ppn, pfn->pid, pfn->vpn, pfn->reference);
+		fprintf(stderr, "\t%ld -> (%lu, %lu) ref: %d\n", pfn->ppn, pfn->pid, pfn->vpn, pfn->reference);
 		pfn = pfn->next;
 	}
 	fprintf(stderr, "\tfree ppn: ");

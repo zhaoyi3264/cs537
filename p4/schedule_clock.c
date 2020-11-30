@@ -13,7 +13,7 @@ void find_pfn(PF *pf, long ppn) {
 	free(key);
 }
 
-PFN *replace_pfn(PF *pf, long pid, long vpn) {
+PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 	// TODO: change this
 	if (pf->head == NULL) {
 		return NULL;

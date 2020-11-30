@@ -70,7 +70,7 @@ char *parse_cmd(int argc, char *argv[], long *page_frame_num) {
 	return trace_file;
 }
 
-void disk_io(ProcT *proc_t, PT *pt, PF *pf, long pid, long vpn) {
+void disk_io(ProcT *proc_t, PT *pt, PF *pf, unsigned long pid, unsigned long vpn) {
 	long ppn = 0;
 	// add page frame and page table
 	ppn = add_pfn(pf, pid, vpn);
@@ -80,9 +80,9 @@ void disk_io(ProcT *proc_t, PT *pt, PF *pf, long pid, long vpn) {
 		delete_pte(pt, replaced->pid, replaced->vpn);
 		// update process table
 		delete_ppn(proc_t, replaced->pid, ppn);
-		//~ printf("replace (%ld, %ld) -> %ld\n", replaced->pid, replaced->vpn, ppn);
+		//~ printf("replace (%lu, %lu) -> %ld\n", replaced->pid, replaced->vpn, ppn);
 	}
-	//~ printf("assign (%ld, %ld) -> %ld\n", pid, vpn, ppn);
+	//~ printf("assign (%lu, %lu) -> %ld\n", pid, vpn, ppn);
 	add_pte(pt, pid, vpn, ppn);
 	add_ppn(proc_t, pid, ppn);
 	//~ print_proc_t(proc_t);
@@ -109,8 +109,8 @@ int main(int argc, char * argv[]) {
 	size_t len = 0;
 	ssize_t size;
 	
-	long pid = 0;
-	long vpn = 0;
+	unsigned long pid = 0;
+	unsigned long vpn = 0;
 	long ppn = 0;
 	
 	PT *pt = create_pt();
@@ -125,7 +125,7 @@ int main(int argc, char * argv[]) {
 		real++;
 		//~ printf("***********\ntick %.6ld\n", real);
 		if ((node = advance(dq))) {
-			//~ printf("dequeue: (%ld, %ld)\n", node->pid, node->vpn);
+			//~ printf("dequeue: (%lu, %lu)\n", node->pid, node->vpn);
 			pid = node->pid;
 			vpn = node->vpn;
 			disk_io(proc_t, pt, pf, pid, vpn);
@@ -144,7 +144,7 @@ int main(int argc, char * argv[]) {
 				tot_mem_ref++;
 				if (advance_to_next_available_line(proc_te)) {
 					// terminate
-					//~ printf("terminate %ld\n", pid);
+					//~ printf("terminate %lu\n", pid);
 					proc_te = delete_proc_te(proc_t, pid);
 					fclose(proc_te->fp);
 					delete_ptes(pt, pid);
@@ -168,7 +168,7 @@ int main(int argc, char * argv[]) {
 				cpu++;
 			// page fault
 			} else {
-				//~ printf("enqueue (%ld, %ld)\n", pid, vpn);
+				//~ printf("enqueue (%lu, %lu)\n", pid, vpn);
 				enqueue(dq, pid, vpn);
 				proc_te->runnable = 0;
 				proc_t->runnable--;
