@@ -5,12 +5,14 @@
 #include "schedule_algo.h"
 
 void find_pfn(PF *pf, long ppn) {
-	IPTE *key = create_ipte(ppn, NULL);
-	void * result = tfind((void *)key, &(pf->root), &compare_ipte);
-	if (result) {
-		(*(IPTE **)result)->pfn->reference = 1;
-	}
-	free(key);
+	//~ IPTE *key = create_ipte(ppn, NULL);
+	//~ void * result = tfind((void *)key, &(pf->root), &compare_ipte);
+	//~ if (result) {
+		//~ (*(IPTE **)result)->pfn->reference = 1;
+	//~ }
+	//~ free(key);
+	pf = NULL;
+	ppn = NULL;
 }
 
 PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
@@ -18,9 +20,9 @@ PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 		return NULL;
 	}
 	PFN *replaced = pf->head;
-	//~ replaced->next = NULL;
 	pf->head = pf->head->next;
 	pf->head->prev = NULL;
+	replaced->next = NULL;
 	IPTE *key = create_ipte(replaced->ppn, NULL);
 	// replace pfn pointed by ipte
 	IPTE *ipte = *(IPTE **)tfind(key, &(pf->root), &compare_ipte);

@@ -24,12 +24,12 @@ FILE *open_trace(char *fname) {
 	return fp;	
 }
 
-void validate_pid_vpn(char *str, char *pid_vpn, char *line, long line_num) {
+void validate_pid_vpn(char *str, char *pid_vpn, char *line, unsigned long line_num) {
 	if (str == NULL) {
-		fprintf(stderr, "error: %ld: invalid trace %s\n", line_num, line);
+		fprintf(stderr, "error: %lu: invalid trace %s\n", line_num, line);
 		exit(1);
 	} else if (is_number(str) == 0) {
-		fprintf(stderr, "error: %ld: invalid %s %s\n", line_num, pid_vpn, str);
+		fprintf(stderr, "error: %lu: invalid %s %s\n", line_num, pid_vpn, str);
 		exit(1);
 	}
 }
@@ -44,13 +44,13 @@ ProcT *parse_trace(char *fname) {
     char *line = NULL;
     size_t len = 0;
     ssize_t size;
-    long line_num = 0;
+    unsigned long line_num = 0;
     
     ProcT *proc_t = create_proc_t();
     
     char *buf = NULL;
     char *token = NULL;
-    long pid = 0;
+    unsigned long pid = 0;
 
     while ((size = getline(&line, &len, fp)) != -1) {
 		line_num++;
@@ -59,12 +59,12 @@ ProcT *parse_trace(char *fname) {
         sprintf(buf, "%s", line);
         token = strtok(buf, " ");
         validate_pid_vpn(token, "pid", line, line_num);
-        pid = strtol(token, NULL, 10);
+        pid = strtoul(token, NULL, 10);
         token = strtok(NULL, " ");
         validate_pid_vpn(token, "vpn", line, line_num);
         update_proc_te_trace(proc_t, pid, ftell(fp) - size);
         if (strtok(NULL, " ")) {
-			fprintf(stderr, "error: %ld: invalid trace %s\n", line_num, line);
+			fprintf(stderr, "error: %lu: invalid trace %s\n", line_num, line);
 			exit(1);
 		}
 		free(buf);

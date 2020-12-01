@@ -39,15 +39,13 @@ Node *dequeue(DiskQueue *dq) {
 	return result;
 }
 
-Node *advance(DiskQueue*dq) {
+void advance(DiskQueue*dq) {
 	if (dq->head) {
 		dq->count_down--;
 		if (dq->count_down == 0) {
 			dq->count_down = dq->cool_down;
-			return dequeue(dq);
 		}
 	}
-	return NULL;
 }
 
 Node *fast_forward(DiskQueue *dq, long *elapse) {

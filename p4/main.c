@@ -99,12 +99,12 @@ int main(int argc, char * argv[]) {
 	ProcT *proc_t = parse_trace(fname);
 	print_proc_t(proc_t);
 
-	long real = 0;
-	long cpu = 0;
-	long mem_util = 0;
-	long run_proc = 0;
-	long tot_mem_ref = 0;
-	long tot_page_in = 0;
+	unsigned long real = 0;
+	unsigned long cpu = 0;
+	unsigned long long mem_util = 0;
+	unsigned long run_proc = 0;
+	unsigned long tot_mem_ref = 0;
+	unsigned long tot_page_in = 0;
 
 	char *line = NULL;
 	char *token = NULL;
@@ -123,21 +123,20 @@ int main(int argc, char * argv[]) {
 	//~ page_frame_num = 5;
 	PF *pf = create_pf(page_frame_num);
 	
-	while (1) {
+while (1) {
 		real++;
 		//~ printf("***********\ntick %.6ld\n", real);
 		if (proc_t->runnable == 0) {
 			// all blocked
-			//~ printf("all blocked\n");
 			long elapse = 0;
 			node = fast_forward(dq, &elapse);
 			real += elapse;
 			mem_util += (pf->size) * elapse;
-			//~ run_proc += (proc_t->runnable) * elapse;
 			disk_io(proc_t, pt, pf, node->pid, node->vpn);
 			free(node);
 			node = NULL;
 		} else if ((proc_te = find_runnable_least_fp(proc_t))) {
+			advance(dq);
 			size = getline(&line, &len, proc_te->fp);
 			line[size - 1] = '\0';
 			//~ printf("execute trace %s\n", line);
@@ -167,12 +166,11 @@ int main(int argc, char * argv[]) {
 					}
 					free(proc_te);
 					proc_t->runnable--;
-					printf("terminated %lu\n", pid);
+					//~ printf("terminated %lu\n", pid);
 					//~ print_proc_t(proc_t);
 					//~ print_pt(pt);
 					//~ print_pf(pf);
 					//~ exit(1);
-					// free mem
 				}
 				cpu++;
 			// page fault
@@ -191,14 +189,14 @@ int main(int argc, char * argv[]) {
 		run_proc += proc_t->runnable;
 		mem_util += pf->size;
 		//~ printf("\n");
-		//~ print_pt(pt);
 		//~ sleep(1);
 	}
 	
 	// statistics
+	printf("MEM: \t%llu\n", mem_util);
 	printf("AMU:\t%f\n", mem_util / (float)real / (float)page_frame_num);
 	printf("ARP:\t%f\n", run_proc / (float)real);
-	printf("TMR:\t%ld\n", tot_mem_ref);
-	printf("TPI:\t%ld\n", tot_page_in);
-	printf("R Time: %ld\nC Time: %ld\n", real, cpu);
+	printf("TMR:\t%lu\n", tot_mem_ref);
+	printf("TPI:\t%lu\n", tot_page_in);
+	printf("R Time: %lu\nC Time: %lu\n", real, cpu);
 }
