@@ -1,3 +1,11 @@
+/*
+ * Trace file parsing module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+
 #ifndef TRACE_PARSER_H
 #define TRACE_PARSER_H
 

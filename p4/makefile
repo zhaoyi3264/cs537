@@ -53,4 +53,3 @@ clean:
 test: test.c $(DEP) schedule_clock.o
 	$(CC) $(WARNING_FLAGS) -c test.c
 	$(CC) -o test test.o $(DEP) schedule_clock.o
-

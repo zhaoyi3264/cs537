@@ -1,3 +1,11 @@
+/*
+ * Page table module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
 #ifndef PAGE_TABLE_H
 #define PAGE_TABLE_H
 

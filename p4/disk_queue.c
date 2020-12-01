@@ -1,8 +1,24 @@
+/*
+ * Disk queue module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "disk_queue.h"
 
+/*
+ * Create a node in queue
+ * 
+ * pid: the pid
+ * vpn: the vpn
+ * 
+ * return: the node created
+ */
 Node *create_node(unsigned long pid, unsigned long vpn) {
 	Node *node = malloc(sizeof(Node));
 	node->pid = pid;
@@ -11,6 +27,13 @@ Node *create_node(unsigned long pid, unsigned long vpn) {
 	return node;
 }
 
+/*
+ * Create disk queue
+ * 
+ * cool_down: the I/O waiting time of the disk queue
+ * 
+ * return: the disk queue created
+ */
 DiskQueue *create_dq(long cool_down) {
 	DiskQueue *dq = malloc(sizeof(DiskQueue));
 	dq->head = NULL;
@@ -20,6 +43,13 @@ DiskQueue *create_dq(long cool_down) {
 	return dq;
 }
 
+/*
+ * Enqueue a (pid, vpn) into the queue
+ * 
+ * dq: the disk queue
+ * pid: the pid
+ * vpn: the vpn
+ */
 void enqueue(DiskQueue *dq, unsigned long pid, unsigned long vpn) {
 	Node *node = create_node(pid, vpn);
 	if (dq->head) {
@@ -30,6 +60,13 @@ void enqueue(DiskQueue *dq, unsigned long pid, unsigned long vpn) {
 	dq->tail = node;
 }
 
+/*
+ * Dequeue from the queue
+ * 
+ * dq: the disk queue
+ * 
+ * return: the node dequeued
+ */
 Node *dequeue(DiskQueue *dq) {
 	Node *result = NULL;
 	if (dq->head) {
@@ -39,7 +76,12 @@ Node *dequeue(DiskQueue *dq) {
 	return result;
 }
 
-void advance(DiskQueue*dq) {
+/*
+ * Decrement the count down, reset if it reached 0
+ * 
+ * dq: the disk queue
+ */
+void advance(DiskQueue *dq) {
 	if (dq->head) {
 		dq->count_down--;
 		if (dq->count_down == 0) {
@@ -48,6 +90,14 @@ void advance(DiskQueue*dq) {
 	}
 }
 
+/*
+ * Fast forward the queue
+ * 
+ * dq: the disk queue
+ * elapse: the time skipped in ticks
+ * 
+ * return: the node dequeued
+ */
 Node *fast_forward(DiskQueue *dq, long *elapse) {
 	if (dq->head) {
 		*elapse = dq->count_down - 1;
@@ -56,6 +106,11 @@ Node *fast_forward(DiskQueue *dq, long *elapse) {
 	return dequeue(dq);
 }
 
+/*
+ * Print disk queue
+ * 
+ * dq: the disk queue
+ */
 void print_dq(DiskQueue *dq) {
 	fprintf(stderr, "\t==========disk queue==========\n\t");
 	Node *current = dq->head;

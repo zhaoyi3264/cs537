@@ -1,3 +1,11 @@
+/*
+ * Process table module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+
 #ifndef PROCESS_TABLE_H
 #define PROCESS_TABLE_H
 

@@ -1,9 +1,24 @@
+/*
+ * Process table module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "process_table.h"
 
+/*
+ * Create a ppn that is used by a process
+ * 
+ * ppn: the physical page number
+ * 
+ * return the ppn
+ */
 PPN *create_ppn(long ppn) {
 	PPN *p = malloc(sizeof(PPN));
 	p->ppn = ppn;
@@ -11,6 +26,13 @@ PPN *create_ppn(long ppn) {
 	return p;
 }
 
+/*
+ * Add a ppn to a process and mark it runnable
+ * 
+ * proc_t: the process table
+ * pid: the pid of the process
+ * ppn: the ppn used by the process
+ */
 void add_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te == NULL) {
@@ -26,7 +48,13 @@ void add_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
 	proc_te->runnable = 1;
 	proc_t->runnable++;
 }
-
+/*
+ * Remove a ppn to a process and mark it runnable
+ * 
+ * proc_t: the process table
+ * pid: the pid of the process
+ * ppn: the ppn used by the process
+ */
 void delete_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te == NULL) {
@@ -50,6 +78,14 @@ void delete_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
 	}
 }
 
+/*
+ * Create a process table entry
+ * 
+ * pid: the pid of the process
+ * byte: the byte in the trace file where the pid occur
+ * 
+ * return: the process table entry created
+ */
 ProcTE *create_proc_te(unsigned long pid, long byte) {
 	ProcTE *proc_te = malloc(sizeof(ProcTE));
 	proc_te->pid = pid;
@@ -63,6 +99,11 @@ ProcTE *create_proc_te(unsigned long pid, long byte) {
 	return proc_te;
 }
 
+/*
+ * Create process table
+ * 
+ * return: the process table
+ */
 ProcT *create_proc_t() {
 	ProcT *proc_t = malloc(sizeof(ProcT));
 	proc_t->head = NULL;
@@ -71,6 +112,14 @@ ProcT *create_proc_t() {
 	return proc_t;
 }
 
+/*
+ * Find a process table entry
+ * 
+ * proc_t: the process table
+ * pid: the pid of the process
+ * 
+ * return: the process table entry found
+ */
 ProcTE *find_proc_te(ProcT *proc_t, unsigned long pid) {
 	ProcTE *current = proc_t->head;
 	while (current) {
@@ -82,10 +131,19 @@ ProcTE *find_proc_te(ProcT *proc_t, unsigned long pid) {
 	return NULL;
 }
 
+/*
+ * Delete a process table entry
+ * 
+ * proc_t: the process table
+ * pid: the pid of the process
+ * 
+ * return: the process table entry deleted
+ */
 ProcTE *delete_proc_te(ProcT *proc_t, unsigned long pid) {
 	if (proc_t->head->pid == pid) {
 		ProcTE *prev_head = proc_t->head;
 		proc_t->head = proc_t->head->next;
+		proc_t->runnable--;
 		return prev_head;
 	}
 	ProcTE *current = proc_t->head;
@@ -93,6 +151,7 @@ ProcTE *delete_proc_te(ProcT *proc_t, unsigned long pid) {
 	while (current) {
 		if (current->pid == pid) {
 			previous->next = current->next;
+			proc_t->runnable--;
 			return current;
 		}
 		previous = current;
@@ -101,6 +160,13 @@ ProcTE *delete_proc_te(ProcT *proc_t, unsigned long pid) {
 	return NULL;
 }
 
+/*
+ * Update a process table entry
+ * 
+ * proc_t: the process table
+ * pid: the pid of the process
+ * byte: the byte in the trace file where the pid occur
+ */
 void update_proc_te_trace(ProcT *proc_t, unsigned long pid, long byte) {
 	ProcTE *proc_te = find_proc_te(proc_t, pid);
 	if (proc_te) {
@@ -118,6 +184,13 @@ void update_proc_te_trace(ProcT *proc_t, unsigned long pid, long byte) {
 	}
 }
 
+/*
+ * Find a runnable process that has the least file pointer
+ * 
+ * proc_t: the process table
+ * 
+ * return: the process table entry found
+ */
 ProcTE *find_runnable_least_fp(ProcT *proc_t) {
 	ProcTE *current = proc_t->head;
 	ProcTE *least = NULL;
@@ -131,6 +204,14 @@ ProcTE *find_runnable_least_fp(ProcT *proc_t) {
 	return least;
 }
 
+/*
+ * Advance the file pointer of the process to the next line that has the same PID
+ * 
+ * proc_te: the process table entry
+ * 
+ * return: 1 if the end of the file is reached or the process is finished, 0 
+ * otherwise
+ */
 int advance_to_next_available_line(ProcTE *proc_te) {
 	FILE *fp = proc_te->fp;
 	char *line = NULL;
@@ -139,6 +220,7 @@ int advance_to_next_available_line(ProcTE *proc_te) {
 	ssize_t size;
 	unsigned long pid = 0;
 	
+	// while before the last occurrence or before the eof
 	while (ftell(fp) <= proc_te->last_byte &&
 		(size = getline(&line, &len, fp)) != -1) {
 		line[size - 1] = '\0';
@@ -152,6 +234,11 @@ int advance_to_next_available_line(ProcTE *proc_te) {
 	return 1;
 }
 
+/*
+ * Print the process table
+ * 
+ * proc_t: process table
+ */
 void print_proc_t(ProcT *proc_t) {
 	ProcTE *current = proc_t->head;
 	fprintf(stderr, "\t==========process table==========\n");

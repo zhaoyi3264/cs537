@@ -1,3 +1,12 @@
+/*
+ * Page replacement scheduling algorithm module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
+ 
 #ifndef SCHEDULE_ALGO_H
 #define SCHEDULE_ALGO_H
 

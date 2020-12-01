@@ -1,3 +1,11 @@
+/*
+ * Disk queue module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
 #ifndef DISK_QUEUE_H
 #define DISK_QUEUE_H
 

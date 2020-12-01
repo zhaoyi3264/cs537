@@ -1,3 +1,11 @@
+/*
+ * Page frame module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+
 #ifndef PAGE_FRAME_H
 #define PAGE_FRAME_H
 
@@ -50,7 +58,7 @@ void add_pfn_helper(PF *pf, PFN *pfn);
 
 long add_pfn(PF *pf, unsigned long pid, unsigned long vpn);
 
-int delete_pfn(PF *pf, long ppn);
+void delete_pfn(PF *pf, long ppn);
 
 void print_pf(PF *pf);
 

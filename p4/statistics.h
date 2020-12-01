@@ -1,3 +1,11 @@
+/*
+ * Statistics module
+ * 
+ * Authors: 
+ * - Zhang, Zhaoyi, zhaoyi, zzhang825
+ * - Li, Richard, richardl, tli354
+ */
+ 
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
