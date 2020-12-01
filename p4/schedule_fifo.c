@@ -5,14 +5,9 @@
 #include "schedule_algo.h"
 
 void find_pfn(PF *pf, long ppn) {
-	//~ IPTE *key = create_ipte(ppn, NULL);
-	//~ void * result = tfind((void *)key, &(pf->root), &compare_ipte);
-	//~ if (result) {
-		//~ (*(IPTE **)result)->pfn->reference = 1;
-	//~ }
-	//~ free(key);
-	pf = NULL;
-	ppn = NULL;
+	if (pf && ppn) {
+		return;
+	}
 }
 
 PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {

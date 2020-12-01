@@ -10,7 +10,7 @@
 #include "page_frame.h"
 #include "schedule_algo.h"
 
-int exponent(long int x) {
+int exponent(long x) {
 	int exp = 0;
 	while (1) {
 		x = x >> 1;
@@ -26,7 +26,7 @@ int exponent(long int x) {
 char *parse_cmd(int argc, char *argv[], long *page_frame_num) {
 	int opt = 0;
 	int mem_size = 1;
-	long int page_size = 4096;
+	long page_size = 4096;
 	char *trace_file = NULL;
 	while ((opt = getopt(argc, argv, "-p:m:")) != -1) {
 		switch (opt) {
@@ -97,14 +97,13 @@ int main(int argc, char * argv[]) {
 	char *fname = parse_cmd(argc, argv, &page_frame_num);
 	ProcTE *proc_te = NULL;
 	ProcT *proc_t = parse_trace(fname);
-	print_proc_t(proc_t);
+	//~ print_proc_t(proc_t);
 
-	unsigned long real = 0;
-	unsigned long cpu = 0;
-	unsigned long long mem_util = 0;
-	unsigned long run_proc = 0;
-	unsigned long tot_mem_ref = 0;
-	unsigned long tot_page_in = 0;
+	long real = 0;
+	long long mem_util = 0;
+	long run_proc = 0;
+	long tot_mem_ref = 0;
+	long tot_page_in = 0;
 
 	char *line = NULL;
 	char *token = NULL;
@@ -172,7 +171,6 @@ while (1) {
 					//~ print_pf(pf);
 					//~ exit(1);
 				}
-				cpu++;
 			// page fault
 			} else {
 				//~ printf("enqueue (%lu, %lu)\n", pid, vpn);
@@ -193,10 +191,9 @@ while (1) {
 	}
 	
 	// statistics
-	printf("MEM: \t%llu\n", mem_util);
 	printf("AMU:\t%f\n", mem_util / (float)real / (float)page_frame_num);
 	printf("ARP:\t%f\n", run_proc / (float)real);
-	printf("TMR:\t%lu\n", tot_mem_ref);
-	printf("TPI:\t%lu\n", tot_page_in);
-	printf("R Time: %lu\nC Time: %lu\n", real, cpu);
+	printf("TMR:\t%ld\n", tot_mem_ref);
+	printf("TPI:\t%ld\n", tot_page_in);
+	printf("R Time: %ld\n", real);
 }

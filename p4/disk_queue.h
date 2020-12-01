@@ -2,8 +2,8 @@
 #define DISK_QUEUE_H
 
 typedef struct Node {
-	long pid;
-	long vpn;
+	unsigned long pid;
+	unsigned long vpn;
 	struct Node *next;
 } Node;
 

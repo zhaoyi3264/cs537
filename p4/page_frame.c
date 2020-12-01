@@ -115,6 +115,7 @@ long add_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 		tsearch((void *)ipte, &(pf->root), &compare_ipte);
 		return ppn;
 	}
+	pf->size--;
 	return -1;
 }
 
