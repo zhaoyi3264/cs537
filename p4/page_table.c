@@ -25,6 +25,9 @@
  */
 PTE *create_pte(unsigned long pid, unsigned long vpn, long ppn) {
 	PTE *pte = malloc(sizeof(PTE));
+	if (pte == NULL) {
+		exit(1);
+	}
 	pte->pid = pid;
 	pte->vpn = vpn;
 	pte->ppn = ppn;
@@ -36,6 +39,9 @@ PTE *create_pte(unsigned long pid, unsigned long vpn, long ppn) {
  */
 PT *create_pt() {
 	PT *pt = malloc(sizeof(PT));
+	if (pt == NULL) {
+		exit(1);
+	}
 	return pt;
 }
 

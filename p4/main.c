@@ -72,7 +72,9 @@ char *parse_cmd(int argc, char *argv[], long *page_frame_num) {
 				break;
 			case 1:
 				trace_file = malloc(strlen(optarg) + 1);
-				sprintf(trace_file, "%s", optarg);
+				if (trace_file == NULL || sprintf(trace_file, "%s", optarg) < 0) {
+					exit(1);
+				}
 				break;
 			default:
 				exit(1);
@@ -154,8 +156,7 @@ int main(int argc, char * argv[]) {
 	// for simulating
 	PT *pt = create_pt();
 	Node *node = NULL;
-	long cool_down = 2000000;
-	DiskQueue *dq = create_dq(cool_down);
+	DiskQueue *dq = create_dq(2000000);
 	PF *pf = create_pf(page_frame_num);
 	Stat *stat = create_stat();
 	// main loop
@@ -210,7 +211,9 @@ int main(int argc, char * argv[]) {
 				enqueue(dq, pid, vpn);
 				proc_te->runnable = 0;
 				proc_t->runnable--;
-				fseek(proc_te->fp, -size, SEEK_CUR);
+				if (fseek(proc_te->fp, -size, SEEK_CUR) < 0) {
+					exit(1);
+				}
 				page_in(stat);
 			}
 		}

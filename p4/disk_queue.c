@@ -21,6 +21,9 @@
  */
 Node *create_node(unsigned long pid, unsigned long vpn) {
 	Node *node = malloc(sizeof(Node));
+	if (node == NULL) {
+		exit(1);
+	}
 	node->pid = pid;
 	node->vpn = vpn;
 	node->next = NULL;
@@ -36,6 +39,9 @@ Node *create_node(unsigned long pid, unsigned long vpn) {
  */
 DiskQueue *create_dq(long cool_down) {
 	DiskQueue *dq = malloc(sizeof(DiskQueue));
+	if (dq == NULL) {
+		exit(1);
+	}
 	dq->head = NULL;
 	dq->tail = NULL;
 	dq->cool_down = cool_down;

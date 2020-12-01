@@ -18,6 +18,9 @@
  */
 Stat *create_stat() {
 	Stat *stat = malloc(sizeof(Stat));
+	if (stat == NULL) {
+		exit(1);
+	}
 	stat->real = 0;
 	stat->mem_util = 0;
 	stat->run_proc = 0;

@@ -93,7 +93,9 @@ ProcT *parse_trace(char *fname) {
 		line_num++;
 		line[size - 1] = '\0';
 		buf = malloc(strlen(line) + 1);
-		sprintf(buf, "%s", line);
+		if (buf == NULL || sprintf(buf, "%s", line) < 0) {
+			exit(1);
+		}
 		// validate the pid and vpn
 		token = strtok(buf, " ");
 		validate_pid_vpn(token, "pid", line, line_num);
@@ -108,12 +110,16 @@ ProcT *parse_trace(char *fname) {
 		}
 		free(buf);
     }
-	fclose(fp);
+	if (fclose(fp) != 0) {
+		exit(1);
+	}
 	// open a file pointer for each process and point to its early occurrence
 	ProcTE *current = proc_t->head;
 	while (current) {
 		current->fp = open_trace(fname);
-		fseek(current->fp, current->first_byte, SEEK_SET);
+		if (fseek(current->fp, current->first_byte, SEEK_SET) < 0) {
+			exit(1);
+		}
 		current = current->next;
 	}
 	return proc_t;

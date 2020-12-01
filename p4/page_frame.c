@@ -23,6 +23,9 @@
  */
 IPTE *create_ipte(long ppn, PFN* pfn) {
 	IPTE* ipte = malloc(sizeof(IPTE));
+	if (ipte == NULL) {
+		exit(1);
+	}
 	ipte->ppn = ppn;
 	ipte->pfn = pfn;
 	return ipte;
@@ -80,6 +83,9 @@ void print_ipte(const void *nodep, const VISIT which, const int depth) {
  */
 FPFN *create_fpfn(long ppn) {
 	FPFN *fpfn = malloc(sizeof(FPFN));
+	if (fpfn == NULL) {
+		exit(1);
+	}
 	fpfn->ppn = ppn;
 	fpfn->next = NULL;
 	return fpfn;
@@ -96,6 +102,9 @@ FPFN *create_fpfn(long ppn) {
  */
 PFN *create_pfn(long ppn, unsigned long pid, unsigned long vpn) {
 	PFN *pfn = malloc(sizeof(PFN));
+	if (pfn == NULL) {
+		exit(1);
+	}
 	pfn->ppn= ppn;
 	pfn->pid = pid;
 	pfn->vpn = vpn;
@@ -114,6 +123,9 @@ PFN *create_pfn(long ppn, unsigned long pid, unsigned long vpn) {
  */
 PF *create_pf(long capacity) {
 	PF *pf = malloc(sizeof(PF));
+	if (pf == NULL) {
+		exit(1);
+	}
 	pf->head = NULL;
 	pf->tail = NULL;
 	pf->free_head = NULL;

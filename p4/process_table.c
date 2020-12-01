@@ -21,6 +21,9 @@
  */
 PPN *create_ppn(long ppn) {
 	PPN *p = malloc(sizeof(PPN));
+	if (p == NULL) {
+		exit(1);
+	}
 	p->ppn = ppn;
 	p->next = NULL;
 	return p;
@@ -88,6 +91,9 @@ void delete_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
  */
 ProcTE *create_proc_te(unsigned long pid, long byte) {
 	ProcTE *proc_te = malloc(sizeof(ProcTE));
+	if (proc_te == NULL) {
+		exit(1);
+	}
 	proc_te->pid = pid;
 	proc_te->first_byte = byte;
 	proc_te->last_byte = byte;
@@ -106,6 +112,9 @@ ProcTE *create_proc_te(unsigned long pid, long byte) {
  */
 ProcT *create_proc_t() {
 	ProcT *proc_t = malloc(sizeof(ProcT));
+	if (proc_t == NULL) {
+		exit(1);
+	}
 	proc_t->head = NULL;
 	proc_t->tail = NULL;
 	proc_t->runnable = 0;
@@ -227,7 +236,9 @@ int advance_to_next_available_line(ProcTE *proc_te) {
 		token = strtok(line, " ");
 		pid = strtol(token, NULL, 10);
 		if (pid == proc_te->pid) {
-			fseek(fp, -size, SEEK_CUR);
+			if (fseek(fp, -size, SEEK_CUR) < 0) {
+				exit(1);
+			}
 			return 0;
 		}
 	}
