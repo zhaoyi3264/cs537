@@ -52,7 +52,6 @@ PFN *create_pfn(long ppn, unsigned long pid, unsigned long vpn) {
 	pfn->prev = NULL;
 	pfn->next = NULL;
 	pfn->reference = 0;
-	pfn->data = NULL;
 	return pfn;
 }
 
@@ -66,6 +65,7 @@ PF *create_pf(long capacity) {
 	pf->count = 0;
 	pf->size = 0;
 	pf->root = NULL;
+	pf->hand = NULL;
 	return pf;
 }
 
@@ -93,6 +93,7 @@ void add_pfn_helper(PF *pf, PFN *pfn) {
 		pfn->prev = pf->tail;
 	} else {
 		pf->head = pfn;
+		pf->hand = pfn;
 	}
 	pf->tail = pfn;
 	pf->size++;
@@ -114,22 +115,32 @@ long add_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 		IPTE *ipte = create_ipte(ppn, pfn);
 		tsearch((void *)ipte, &(pf->root), &compare_ipte);
 		return ppn;
+	} else{
+		return -1;
 	}
-	pf->size--;
-	return -1;
 }
 
 void delete_pfn_helper(PF *pf, PFN *pfn) {
 	if (pfn->prev == NULL && pfn->next == NULL) {
 		pf->head = NULL;
 		pf->tail = NULL;
+		pf->hand = NULL;
 	} else if (pfn->prev == NULL) {
+		if (pf->hand == pfn) {
+			pf->hand = pf->head->next;
+		}
 		pf->head = pfn->next;
 		pf->head->prev = NULL;
 	} else if (pfn->next == NULL) {
+		if (pf->hand == pfn) {
+			pf->hand = pf->head;
+		}
 		pf->tail = pfn->prev;
 		pf->tail->next = NULL;
 	} else {
+		if (pf->hand == pfn) {
+			pf->hand = pfn->next;
+		}
 		pfn->prev->next = pfn->next;
 		pfn->next->prev = pfn->prev;
 	}
@@ -154,24 +165,6 @@ int delete_pfn(PF *pf, long ppn) {
 	}
 }
 
-void delete_pfns(PF *pf, unsigned long pid) {
-	PFN *pfn = pf->head;
-	PFN *next = NULL;
-	while (pfn) {
-		if (pfn->pid == pid) {
-			next = pfn->next;
-			delete_pfn_helper(pf, pfn);
-			IPTE *key = create_ipte(pfn->ppn, NULL);
-			tdelete(key, &(pf->root), &compare_ipte);
-			free(key);
-			add_fpfn(pf, pfn->ppn);
-			pfn = next;
-		} else {
-			pfn = pfn->next;
-		}
-	}
-}
-
 void print_pf(PF *pf) {
 	fprintf(stderr, "\t==========page frame==========\n");
 	PFN *pfn = pf->head;
@@ -179,6 +172,8 @@ void print_pf(PF *pf) {
 		fprintf(stderr, "\t%ld -> (%lu, %lu) ref: %d\n", pfn->ppn, pfn->pid, pfn->vpn, pfn->reference);
 		pfn = pfn->next;
 	}
+	fprintf(stderr, "\tsize: %ld\n", pf->size);
+	fprintf(stderr, "\thand: %ld\n", pf->hand->ppn);
 	fprintf(stderr, "\tfree ppn: ");
 	FPFN *fpfn = pf->free_head;
 	while (fpfn) {

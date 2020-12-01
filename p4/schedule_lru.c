@@ -18,13 +18,11 @@ void find_pfn(PF *pf, long ppn) {
 }
 
 PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
-	if (pf->head == NULL) {
-		return NULL;
-	}
 	PFN *replaced = pf->head;
 	pf->head = pf->head->next;
 	pf->head->prev = NULL;
 	replaced->next = NULL;
+	pf->size--;
 	IPTE *key = create_ipte(replaced->ppn, NULL);
 	// replace pfn pointed by ipte
 	IPTE *ipte = *(IPTE **)tfind(key, &(pf->root), &compare_ipte);

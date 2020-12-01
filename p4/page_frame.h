@@ -13,7 +13,6 @@ typedef struct PFN {
 	struct PFN *prev;
 	struct PFN *next;
 	int reference;
-	void *data;
 } PFN;
 
 typedef struct PF {
@@ -25,6 +24,7 @@ typedef struct PF {
 	long count;
 	long size;
 	void *root;
+	PFN *hand;
 } PF;
 
 typedef struct IPTE {
@@ -51,8 +51,6 @@ void add_pfn_helper(PF *pf, PFN *pfn);
 long add_pfn(PF *pf, unsigned long pid, unsigned long vpn);
 
 int delete_pfn(PF *pf, long ppn);
-
-void delete_pfns(PF *pf, unsigned long pid);
 
 void print_pf(PF *pf);
 

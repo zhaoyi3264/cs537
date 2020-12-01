@@ -53,19 +53,19 @@ void page_table() {
 }
 
 void disk_queue() {
-	DiskQueue *dq = create_dq(5);
-	for (int i = 0; i < 10; i++) {
-		enqueue(dq, rand10() % 10, rand10());
-	}
-	print_dq(dq);
-	for (int i = 0; i < 60; i++) {
-		Node *node = advance(dq);
-		if (node) {
-			printf("%d: vpn: %ld vpn: %ld\n", i, node->pid, node->pid);
-			free(node);
-		}
-	}
-	free(dq);
+	//~ DiskQueue *dq = create_dq(5);
+	//~ for (int i = 0; i < 10; i++) {
+		//~ enqueue(dq, rand10() % 10, rand10());
+	//~ }
+	//~ print_dq(dq);
+	//~ for (int i = 0; i < 60; i++) {
+		//~ Node *node = advance(dq);
+		//~ if (node) {
+			//~ printf("%d: vpn: %ld vpn: %ld\n", i, node->pid, node->pid);
+			//~ free(node);
+		//~ }
+	//~ }
+	//~ free(dq);
 }
 
 void page_frame_1() {
@@ -83,7 +83,7 @@ void page_frame_2() {
 		printf("%ld\n", add_pfn(pf, 0, 0));
 	}
 	printf("%ld\n", add_pfn(pf, 1, 1));
-	delete_pfns(pf, 0);
+	//~ delete_pfns(pf, 0);
 	print_pf(pf);
 	for(int i = 1; i < 10; i++) {
 		printf("%ld\n", add_pfn(pf, i * 100, i * 100));
@@ -149,6 +149,18 @@ void fifo_page_table() {
 	free(pt);
 }
 
+void clock_page_table() {
+	PF *pf = create_pf(5);
+	for (int i = 1; i < 6; i++) {
+		add_pfn(pf, i, i * 10);
+	}
+	find_pfn(pf, 0);
+	find_pfn(pf, 2);
+	find_pfn(pf, 4);
+	printf("pf: %ld\n", replace_pfn(pf, 6, 60)->ppn);
+	print_pf(pf);
+}
+
 int main() {
 	time_t t;
 	srand((unsigned) time(&t));
@@ -160,8 +172,5 @@ int main() {
 	//~ page_frame_2();
 	//~ fifo();
 	//~ fifo_page_table();
-	PF *pf = create_pf(5);
-	add_pfn(pf, 1, 2);
-	add_pfn(pf, 2, 4);
-	print_pf(pf);
+	clock_page_table();
 }

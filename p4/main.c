@@ -7,7 +7,7 @@
 #include "trace_parser.h"
 #include "page_table.h"
 #include "disk_queue.h"
-#include "page_frame.h"
+#include "statistics.h"
 #include "schedule_algo.h"
 
 int exponent(long x) {
@@ -97,13 +97,8 @@ int main(int argc, char * argv[]) {
 	char *fname = parse_cmd(argc, argv, &page_frame_num);
 	ProcTE *proc_te = NULL;
 	ProcT *proc_t = parse_trace(fname);
+	free(fname);
 	//~ print_proc_t(proc_t);
-
-	long real = 0;
-	long long mem_util = 0;
-	long run_proc = 0;
-	long tot_mem_ref = 0;
-	long tot_page_in = 0;
 
 	char *line = NULL;
 	char *token = NULL;
@@ -113,6 +108,7 @@ int main(int argc, char * argv[]) {
 	unsigned long pid = 0;
 	unsigned long vpn = 0;
 	long ppn = 0;
+	long elapse = 0;
 	
 	PT *pt = create_pt();
 	Node *node = NULL;
@@ -121,16 +117,14 @@ int main(int argc, char * argv[]) {
 	DiskQueue *dq = create_dq(cool_down);
 	//~ page_frame_num = 5;
 	PF *pf = create_pf(page_frame_num);
+	Stat *stat = create_stat();
 	
-while (1) {
-		real++;
+	while (1) {
 		//~ printf("***********\ntick %.6ld\n", real);
 		if (proc_t->runnable == 0) {
 			// all blocked
-			long elapse = 0;
 			node = fast_forward(dq, &elapse);
-			real += elapse;
-			mem_util += (pf->size) * elapse;
+			tick(stat, elapse, (pf->size) * elapse, 0);
 			disk_io(proc_t, pt, pf, node->pid, node->vpn);
 			free(node);
 			node = NULL;
@@ -146,7 +140,7 @@ while (1) {
 			// find
 			if ((ppn = find_pte(pt, pid, vpn)) != -1) {
 				find_pfn(pf, ppn);
-				tot_mem_ref++;
+				mem_ref(stat);
 				if (advance_to_next_available_line(proc_te)) {
 					// terminate
 					//~ printf("terminate %lu\n", pid);
@@ -169,7 +163,6 @@ while (1) {
 					//~ print_proc_t(proc_t);
 					//~ print_pt(pt);
 					//~ print_pf(pf);
-					//~ exit(1);
 				}
 			// page fault
 			} else {
@@ -178,22 +171,16 @@ while (1) {
 				proc_te->runnable = 0;
 				proc_t->runnable--;
 				fseek(proc_te->fp, -size, SEEK_CUR);
-				tot_page_in++;
+				page_in(stat);
 			}
 		}
+		tick(stat, 1, pf->size, proc_t->runnable);
 		if (proc_t->head == NULL) {
 			break;
 		}
-		run_proc += proc_t->runnable;
-		mem_util += pf->size;
-		//~ printf("\n");
-		//~ sleep(1);
+		//~ sleep(0.9);
 	}
 	
 	// statistics
-	printf("AMU:\t%f\n", mem_util / (float)real / (float)page_frame_num);
-	printf("ARP:\t%f\n", run_proc / (float)real);
-	printf("TMR:\t%ld\n", tot_mem_ref);
-	printf("TPI:\t%ld\n", tot_page_in);
-	printf("R Time: %ld\n", real);
+	print_stat(stat, page_frame_num);
 }
