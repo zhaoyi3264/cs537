@@ -78,6 +78,9 @@ Node *dequeue(DiskQueue *dq) {
 	if (dq->head) {
 		result = dq->head;
 		dq->head = dq->head->next;
+		if (dq->head == NULL) {
+			dq->tail = NULL;
+		}
 	}
 	return result;
 }
@@ -90,6 +93,7 @@ Node *dequeue(DiskQueue *dq) {
 void advance(DiskQueue *dq) {
 	if (dq->head) {
 		dq->count_down--;
+		// reset
 		if (dq->count_down == 0) {
 			dq->count_down = dq->cool_down;
 		}

@@ -164,6 +164,9 @@ void add_fpfn(PF *pf, long ppn) {
 long delete_fpfn(PF *pf) {
 	FPFN *fpfn = pf->free_head;
 	pf->free_head = pf->free_head->next;
+	if (pf->free_head == NULL) {
+		pf->free_tail = NULL;
+	}
 	long ppn = fpfn->ppn;
 	free(fpfn);
 	return ppn;
@@ -176,6 +179,8 @@ long delete_fpfn(PF *pf) {
  * pfn: the pfn
  */
 void add_pfn_helper(PF *pf, PFN *pfn) {
+	// add into a doubly linked list
+	// set the hand if necessary
 	if (pf->head) {
 		pf->tail->next = pfn;
 		pfn->prev = pf->tail;
@@ -226,6 +231,8 @@ long add_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
  * pfn: the page frame node
  */
 void delete_pfn_helper(PF *pf, PFN *pfn) {
+	// delete from a doubly linked list
+	// move the hand if necessary
 	if (pfn->prev == NULL && pfn->next == NULL) {
 		pf->head = NULL;
 		pf->tail = NULL;
@@ -289,7 +296,9 @@ void print_pf(PF *pf) {
 		pfn = pfn->next;
 	}
 	fprintf(stderr, "\tsize: %ld\n", pf->size);
-	fprintf(stderr, "\thand: %ld\n", pf->hand->ppn);
+	if (pf->hand) {
+		fprintf(stderr, "\thand: %ld\n", pf->hand->ppn);
+	}
 	fprintf(stderr, "\tfree ppn: ");
 	FPFN *fpfn = pf->free_head;
 	while (fpfn) {

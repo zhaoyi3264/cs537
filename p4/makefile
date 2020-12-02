@@ -49,7 +49,3 @@ schedule_clock.o: schedule_clock.c schedule_algo.h page_frame.h
 
 clean:
 	rm -f $(EXE_FIFO) $(EXE_LRU) $(EXE_CLOCK) *.o
-	
-test: test.c $(DEP) schedule_clock.o
-	$(CC) $(WARNING_FLAGS) -c test.c
-	$(CC) -o test test.o $(DEP) schedule_clock.o

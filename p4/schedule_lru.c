@@ -22,6 +22,7 @@ void find_pfn(PF *pf, long ppn) {
 	void * result = tfind((void *)key, &(pf->root), &compare_ipte);
 	if (result) {
 		PFN *pfn = (*(IPTE **)result)->pfn;
+		// move the pfn to the tail
 		if (pfn != pf->tail) {
 			delete_pfn_helper(pf, pfn);
 			add_pfn_helper(pf, pfn);
@@ -40,6 +41,7 @@ void find_pfn(PF *pf, long ppn) {
  * return: the replaced pfn
  */
 PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
+	// remove the head of the page frame
 	PFN *replaced = pf->head;
 	pf->head = pf->head->next;
 	pf->head->prev = NULL;

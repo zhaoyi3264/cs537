@@ -110,23 +110,44 @@ void disk_io(ProcT *proc_t, PT *pt, PF *pf, unsigned long pid, unsigned long vpn
 	long ppn = -1;
 	// add page frame and page table
 	ppn = add_pfn(pf, pid, vpn);
-	//~ printf("pfn added %ld\n", ppn);
 	if (ppn == -1) {
 		PFN *replaced = replace_pfn(pf, pid, vpn);
 		ppn = replaced->ppn;
-		//~ printf("pfn replaced %ld\n", ppn);
 		delete_pte(pt, replaced->pid, replaced->vpn);
 		// update process table
 		delete_ppn(proc_t, replaced->pid, ppn);
-		//~ printf("replace (%lu, %lu) -> %ld\n", replaced->pid, replaced->vpn, ppn);
 		free(replaced);
 	}
-	//~ printf("assign (%lu, %lu) -> %ld\n", pid, vpn, ppn);
 	add_pte(pt, pid, vpn, ppn);
 	add_ppn(proc_t, pid, ppn);
-	//~ print_proc_t(proc_t);
-	//~ print_pt(pt);
-	//~ print_pf(pf);
+}
+
+/*
+ * Terminate a process
+ * 
+ * proc_t: the process table
+ * pt: the page table
+ * pf: the page frame
+ * pid: the pid of the trace
+ * vpn: the vpn of the trace
+ */
+void terminate_proc(ProcT *proc_t, PT *pt, PF *pf, unsigned long pid) {
+	ProcTE *proc_te = delete_proc_te(proc_t, pid);
+	// remove relavent page table entries
+	delete_ptes(pt, pid);
+	// remove relavent page frames
+	PPN *previous_ppn = NULL;
+	PPN *current_ppn = proc_te->ppn_head;
+	while (current_ppn) {
+		delete_pfn(pf, current_ppn->ppn);
+		previous_ppn = current_ppn;
+		current_ppn = current_ppn->next;
+		free(previous_ppn);
+	}
+	if (fclose(proc_te->fp) != 0) {
+		exit(1);
+	}
+	free(proc_te);
 }
 
 /*
@@ -161,7 +182,6 @@ int main(int argc, char * argv[]) {
 	Stat *stat = create_stat();
 	// main loop
 	while (1) {
-		//~ printf("***********\ntick %.6ld\n", real);
 		if (proc_t->runnable == 0) {
 			// all blocked, fast forward and do the I/O
 			node = fast_forward(dq, &elapse);
@@ -175,7 +195,6 @@ int main(int argc, char * argv[]) {
 			// read and parse the trace from the file pointer of that PID
 			size = getline(&line, &len, proc_te->fp);
 			line[size - 1] = '\0';
-			//~ printf("execute trace %s\n", line);
 			token = strtok(line, " ");
 			pid = strtoul(token, NULL, 10);
 			token = strtok(NULL, " ");
@@ -188,26 +207,10 @@ int main(int argc, char * argv[]) {
 				// the same PID
 				if (advance_to_next_available_line(proc_te)) {
 					// terminate
-					//~ printf("terminate %lu\n", pid);
-					proc_te = delete_proc_te(proc_t, pid);
-					// remove relavent page table entries
-					delete_ptes(pt, pid);
-					// remove relavent page frames
-					PPN *previous_ppn = NULL;
-					PPN *current_ppn = proc_te->ppn_head;
-					while (current_ppn) {
-						delete_pfn(pf, current_ppn->ppn);
-						previous_ppn = current_ppn;
-						current_ppn = current_ppn->next;
-						free(previous_ppn);
-					}
-					fclose(proc_te->fp);
-					free(proc_te);
-					//~ printf("terminated %lu\n", pid);
+					terminate_proc(proc_t, pt, pf, pid);
 				}
 			} else {
 				// page fault
-				//~ printf("enqueue (%lu, %lu)\n", pid, vpn);
 				enqueue(dq, pid, vpn);
 				proc_te->runnable = 0;
 				proc_t->runnable--;
@@ -222,7 +225,6 @@ int main(int argc, char * argv[]) {
 		if (proc_t->head == NULL) {
 			break;
 		}
-		//~ sleep(0.9);
 	}
 	print_stat(stat, page_frame_num);
 }

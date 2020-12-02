@@ -18,6 +18,7 @@
  * ppn: the ppn
  */
 void find_pfn(PF *pf, long ppn) {
+	// do nothing
 	if (pf && ppn) {
 		return;
 	}
@@ -33,6 +34,7 @@ void find_pfn(PF *pf, long ppn) {
  * return: the replaced pfn
  */
 PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
+	// remove the head of the page frame
 	PFN *replaced = pf->head;
 	pf->head = pf->head->next;
 	pf->head->prev = NULL;

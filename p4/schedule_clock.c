@@ -36,13 +36,17 @@ void find_pfn(PF *pf, long ppn) {
  * return: the replaced pfn
  */
 PFN *swipe(PF *pf) {
+	// make a circular linked list
 	pf->tail->next = pf->head;
 	PFN *pfn = pf->hand;
+	// find the pfn with reference bit 0
 	while (pfn->reference) {
 		pfn->reference = 0;
 		pfn = pfn->next;
 	}
+	// undo the circular linked list
 	pf->tail->next = NULL;
+	// set the hand
 	if (pfn->prev == NULL && pfn->next == NULL) {
 		pf->hand = NULL;
 	} else if (pfn->prev == NULL) {
@@ -58,6 +62,7 @@ PFN *swipe(PF *pf) {
 PFN *replace_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 	PFN *position = swipe(pf);
 	PFN *replaced = create_pfn(position->ppn, position->pid, position->vpn);
+	// change the pid and vpn of the replaced pfn
 	position->pid = pid;
 	position->vpn = vpn;
 	return replaced;
