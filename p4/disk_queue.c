@@ -78,9 +78,6 @@ Node *dequeue(DiskQueue *dq) {
 	if (dq->head) {
 		result = dq->head;
 		dq->head = dq->head->next;
-		if (dq->head == NULL) {
-			dq->tail = NULL;
-		}
 	}
 	return result;
 }

@@ -91,8 +91,6 @@ char *parse_cmd(int argc, char *argv[], long *page_frame_num) {
 		fprintf(stderr, "error: page size must be greater than real memory size\n");
 		exit(1);
 	}
-	//~ printf("page size: %ld\n mem size: %d\n  pf size: %ld\n    trace: %s\n",
-		//~ page_size, mem_size, *page_frame_num, trace_file);
 	return trace_file;
 }
 

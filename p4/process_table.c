@@ -70,7 +70,7 @@ void delete_ppn(ProcT *proc_t, unsigned long pid, long ppn) {
 		free(current);
 		return;
 	}
-	while(current) {
+	while (current) {
 		if (current && current->ppn == ppn) {
 			previous->next = current->next;
 			free(current);

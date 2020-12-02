@@ -164,9 +164,6 @@ void add_fpfn(PF *pf, long ppn) {
 long delete_fpfn(PF *pf) {
 	FPFN *fpfn = pf->free_head;
 	pf->free_head = pf->free_head->next;
-	if (pf->free_head == NULL) {
-		pf->free_tail = NULL;
-	}
 	long ppn = fpfn->ppn;
 	free(fpfn);
 	return ppn;
@@ -205,9 +202,11 @@ long add_pfn(PF *pf, unsigned long pid, unsigned long vpn) {
 	int add = 0;
 	long ppn = -1;
 	if (pf->free_head) {
+		// free ppn
 		add = 1;
 		ppn = delete_fpfn(pf);
 	} else if (pf->count < pf->capacity) {
+		// empty ppn at first
 		add = 1;
 		ppn = pf->count++;
 	}
