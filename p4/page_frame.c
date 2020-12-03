@@ -111,6 +111,7 @@ PFN *create_pfn(long ppn, unsigned long pid, unsigned long vpn) {
 	pfn->prev = NULL;
 	pfn->next = NULL;
 	pfn->reference = 0;
+	pfn->data = NULL;
 	return pfn;
 }
 

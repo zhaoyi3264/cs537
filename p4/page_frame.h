@@ -21,6 +21,7 @@ typedef struct PFN {
 	struct PFN *prev;
 	struct PFN *next;
 	int reference;
+	void *data;
 } PFN;
 
 typedef struct PF {
