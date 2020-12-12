@@ -1,3 +1,0 @@
-This program is a page frame simulator. The program takes two parameters (page
-frame size and real memory size) and a name of the trace file. The simulator
-executes the traces and report a statistics at the end.
